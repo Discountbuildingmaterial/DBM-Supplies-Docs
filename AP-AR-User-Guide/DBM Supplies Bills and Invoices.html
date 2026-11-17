@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DBM Supplies Bills and Invoices</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: the DBM Supplies portal on paper. A stone-black title band with the amber logo, then one column of
+   white cards. Amber only for step numbers and buttons; the portal's own status colours inside the drawn screens.
+   One deliberate light look, because staff print it. */
+:root{
+  --band:#1c1917;--band-2:#292524;--amber:#f59e0b;--amber-deep:#b45309;--amber-soft:#fffbeb;
+  --paper:#f5f3ef;--ground:#faf8f5;--line:#e7e5e4;--surface:#fff;--ink:#1c1917;--ink-2:#57534e;--soft:#78716c;--band-text:#d6d3d1;
+  --good:#1e7a46;--good-bg:#e8f6ec;--warn:#8a6a12;--warn-bg:#fdf8e6;--bad:#c22a1e;--bad-bg:#fdeae7;--info:#1d5fab;--info-bg:#e8f1fb;
+  --display:"Archivo","Inter","Segoe UI",system-ui,sans-serif;
+  --text:"Inter",ui-sans-serif,"Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--text);font-size:16px;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.wrap{max-width:880px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);color:var(--ink);text-wrap:balance;margin:0}
+p{margin:0;color:var(--ink-2)}
+strong{color:var(--ink)}
+.k{font-weight:600;color:var(--ink);white-space:nowrap}
+
+/* Title band */
+.band{background:var(--band);color:var(--paper)}
+.band .wrap{padding-block:26px 34px}
+.logo{display:block;width:150px;height:auto}
+.band h1{color:#fff;font-weight:800;font-size:clamp(30px,5.4vw,46px);line-height:1.06;letter-spacing:-.015em;margin-top:30px}
+.band .lede{color:var(--band-text);font-size:18px;margin-top:12px;max-width:62ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:22px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#a8a29e}
+.meta span:first-child{color:var(--amber)}
+.subbar{background:var(--band-2)}
+.subbar .wrap{display:flex;flex-wrap:wrap;gap:8px;padding-block:12px}
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--paper);background:#3a3532;border-radius:999px;padding:6px 13px}
+.chip b{font-family:var(--display);color:var(--amber);font-weight:800;letter-spacing:.04em}
+
+main.wrap{padding-block:30px 48px;display:flex;flex-direction:column;gap:22px}
+section.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:26px 28px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--amber-deep)}
+.head{display:flex;flex-direction:column;gap:6px}
+section h2{font-size:25px;font-weight:700;line-height:1.2}
+.small{font-size:14.5px}
+
+/* Journey */
+.journey{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;counter-reset:j}
+.stop{position:relative;background:var(--ground);border:1px solid var(--line);border-radius:8px;padding:12px 10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.stop .who{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--soft)}
+.stop.you{background:var(--amber-soft);border-color:#f7d48a}
+.stop.you .who{color:var(--amber-deep)}
+.stop b{font-family:var(--display);font-size:15px;line-height:1.2;color:var(--ink)}
+.stop p{font-size:12.5px;line-height:1.4}
+.stop:not(:last-child)::after{content:"";position:absolute;right:-8px;top:50%;width:8px;height:2px;background:var(--amber)}
+.lanes{display:grid;grid-template-columns:4fr 2fr;gap:8px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--soft)}
+.lanes span{border-top:2px solid var(--line);padding-top:6px}
+.lanes span:last-child{border-color:var(--amber)}
+
+/* Steps */
+.steps{display:flex;flex-direction:column;gap:18px}
+.step{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:22px;align-items:start}
+.step.solo{grid-template-columns:1fr}
+.step-text{display:flex;gap:14px;align-items:flex-start;min-width:0}
+.num{flex:none;width:34px;height:34px;border-radius:50%;background:var(--amber);color:var(--band);font-family:var(--display);font-weight:800;font-size:17px;display:grid;place-items:center}
+.step h3{font-size:18px;font-weight:700;line-height:1.25}
+.step p{font-size:14.5px;margin-top:4px}
+.divider{height:1px;background:var(--line)}
+
+/* Callouts */
+.callout{display:flex;gap:12px;align-items:flex-start;border-radius:8px;padding:12px 16px;font-size:15px}
+.callout svg{flex:none;width:22px;height:22px;margin-top:1px}
+.callout.good{background:var(--good-bg);border:1px solid #bfe3cb;color:#17603a}
+.callout.good strong,.callout.good p{color:#17603a}
+.callout.warn{background:var(--warn-bg);border:1px solid #efdfa6;color:#6b520c}
+.callout.warn strong,.callout.warn p{color:#6b520c}
+.callout.info{background:var(--info-bg);border:1px solid #c6daf2}
+.callout.info p,.callout.info strong{color:#174d8c}
+
+/* Drawn portal screens */
+.screen{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground);box-shadow:0 8px 22px rgba(28,25,23,.09);min-width:0;font-family:var(--text)}
+.screen .bar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#efece8;border-bottom:1px solid var(--line)}
+.screen .bar i{width:9px;height:9px;border-radius:50%;background:#d6d3d1}
+.screen .bar span{margin-left:8px;font-size:11px;color:var(--soft);background:#fff;border:1px solid var(--line);border-radius:6px;padding:2px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.screen .body{padding:14px;display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--ink)}
+.scroll{overflow-x:auto}
+.ui-title{font-family:var(--display);font-weight:700;font-size:16px}
+.ui-sub{font-size:12px;color:var(--soft)}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;white-space:nowrap;line-height:1.35}
+.b-good{background:var(--good-bg);color:var(--good)}
+.b-good-solid{background:var(--good);color:#fff}
+.b-warn{background:var(--warn-bg);color:var(--warn)}
+.b-bad{background:var(--bad-bg);color:var(--bad)}
+.b-info{background:var(--info-bg);color:var(--info)}
+.b-neutral{background:#f0efed;color:var(--soft)}
+.b-stack{flex-direction:column;align-items:flex-start;gap:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:600;border-radius:8px;padding:7px 13px;white-space:nowrap;border:1px solid transparent}
+.btn-primary{background:var(--amber);color:var(--band)}
+.btn-ghost{background:#fff;border-color:var(--line);color:var(--ink)}
+.btn-danger{background:#fff;border-color:#f3c4bf;color:var(--bad)}
+.btn-small{font-size:11px;padding:3px 9px;border-radius:6px}
+.hl{outline:2.5px solid var(--amber);outline-offset:3px;border-radius:8px}
+.pin{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--amber);color:var(--band);font-family:var(--display);font-weight:800;font-size:11px;flex:none;vertical-align:middle}
+
+/* Home mock */
+.switch{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px}
+.switch span{font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;color:var(--soft)}
+.switch span.on{background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:2px}
+.tile b{font-family:var(--display);font-size:20px;color:var(--amber-deep)}
+.tile span{font-size:12px;color:var(--soft)}
+
+/* Sidebar mock */
+.sidebar{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:4px;max-width:270px}
+.pills{display:flex;gap:4px;margin-bottom:6px}
+.pills span{flex:1;text-align:center;font-size:12px;font-weight:700;padding:5px 0;border-radius:6px;background:#f0efed;color:var(--soft)}
+.pills span.on{background:var(--amber);color:var(--band)}
+.nav{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:6px 8px;border-radius:6px}
+.nav small{color:var(--soft);font-size:11px}
+.nav.on{background:var(--amber-soft);font-weight:600}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);padding:8px 8px 2px}
+
+/* Mock tables */
+.mt{border-collapse:collapse;width:100%;background:#fff;border:1px solid var(--line);border-radius:8px;font-size:12px}
+.mt th{text-align:left;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);padding:8px 9px;border-bottom:1px solid var(--line);white-space:nowrap}
+.mt td{padding:9px;border-bottom:1px solid var(--line);vertical-align:top}
+.mt tr:last-child td{border-bottom:0}
+.mt .r{text-align:right;font-variant-numeric:tabular-nums}
+.mt tr.flag td{background:#fffaf9}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);font-size:12.5px;flex-wrap:wrap}
+.tabs span{padding:6px 10px;color:var(--soft)}
+.tabs span.on{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--amber)}
+.tabs em{font-style:normal;font-size:10.5px;background:#f0efed;border-radius:999px;padding:1px 6px;margin-left:4px}
+
+/* Approve card mock */
+.panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.panel h4{margin:0;font-family:var(--display);font-size:14px;display:flex;align-items:center;gap:8px}
+.tick{width:24px;height:24px;border-radius:50%;background:var(--amber-soft);color:var(--amber-deep);display:grid;place-items:center;font-size:12px;font-weight:800}
+.checks{display:flex;flex-direction:column;gap:4px;font-size:12px}
+.checks span{display:flex;gap:6px;align-items:center}
+.note-box{border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:12px;color:var(--soft);background:var(--ground)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.err{background:var(--bad-bg);color:var(--bad);border-radius:6px;padding:7px 9px;font-size:12px}
+.dialog{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 18px 40px rgba(28,25,23,.18);display:flex;flex-direction:column;gap:10px;max-width:400px;margin:6px auto}
+.checkbox{display:flex;gap:9px;align-items:flex-start;font-size:12.5px}
+.checkbox i{flex:none;width:16px;height:16px;border-radius:4px;background:var(--amber);color:var(--band);display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:800;margin-top:1px}
+
+/* Legend and help tables */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table.guide{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+table.guide th{background:var(--ground);text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);padding:10px 14px;border-bottom:1px solid var(--line)}
+table.guide td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+table.guide tr:last-child td{border-bottom:0}
+table.guide td:first-child{width:34%;color:var(--ink);font-weight:600}
+.group td{background:var(--ground);font-size:11px!important;font-weight:700!important;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-deep)!important;padding:7px 14px!important}
+
+/* Small grids */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mini{border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;background:var(--ground);min-width:0}
+.mini h3{font-size:16px;font-weight:700}
+.mini p{font-size:14px}
+.supplier{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:4px 16px;padding:12px 0;border-bottom:1px solid var(--line)}
+.supplier:last-child{border-bottom:0;padding-bottom:0}
+.supplier b{font-family:var(--display);font-size:16px}
+.supplier small{display:block;color:var(--soft);font-size:12.5px}
+.supplier p{font-size:14.5px}
+ul.plain{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:var(--ink-2);font-size:15px}
+
+.status{display:inline-flex;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.s-not{background:#f0efed;color:var(--ink-2)}
+.s-part{background:var(--warn-bg);color:var(--warn)}
+table.guide.todo td:first-child{width:28%}
+table.guide.todo td:last-child{width:34%}
+.todo-sub{font-family:var(--display);font-size:18px;font-weight:700;margin-top:6px}
+.s-ok{background:var(--good-bg);color:var(--good)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;color:var(--ink-2)}
+.legend>span{display:inline-flex;gap:7px;align-items:center}
+.watch{background:var(--ground);border:1px solid var(--line);border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.watch h3{font-size:16px}
+.watch ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14.5px;color:var(--ink-2)}
+.todo-h{font-family:var(--display);font-size:21px;font-weight:800;margin-top:10px;padding-top:14px;border-top:2px solid var(--amber)}
+h4.todo-sub{margin:4px 0 -4px;font-size:15.5px}
+
+
+/* "To be added" screens: whole portal pages drawn with sample data; violet rings mark what's coming */
+.pv-intro{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6d28d9;margin-top:4px}
+.pv-intro::after{content:"";flex:1;height:1px;background:#ddd6fe}
+.shot-wrap{display:flex;flex-direction:column;gap:10px}
+.shot-title{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.shot-title b{font-family:var(--display);font-size:16px}
+.sample{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6d28d9;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:999px;padding:2px 8px;white-space:nowrap}
+.canvas{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:#efece8}
+.canvas .bar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#efece8;border-bottom:1px solid var(--line)}
+.canvas .bar i{width:9px;height:9px;border-radius:50%;background:#d6d3d1}
+.canvas .bar span{margin-left:8px;font-size:11px;color:var(--soft);background:#fff;border:1px solid var(--line);border-radius:6px;padding:2px 10px;white-space:nowrap}
+.app{min-width:800px;background:#faf8f5;padding:18px;display:flex;flex-direction:column;gap:12px;font-size:12.5px;color:var(--ink);line-height:1.45}
+.app.split{flex-direction:row;padding:0;gap:0}
+.app.split>.main{flex:1;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.ptitle{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01em;line-height:1.15}
+.psub{font-size:12px;color:var(--soft)}
+.w{background:#fff;border:1px solid var(--line);border-radius:12px}
+.pad{padding:12px 14px}
+.tabsbar{display:flex;align-items:center;gap:6px;padding:8px 10px}
+.tabsbar .t{font-weight:600;font-size:12.5px;color:var(--ink-2);padding:6px 12px;border-radius:10px;display:inline-flex;gap:6px;align-items:center}
+.tabsbar .t em{font-style:normal;font-size:10.5px;background:#f0efed;border-radius:999px;padding:0 6px;color:var(--soft)}
+.tabsbar .t.on{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+.tabsbar .t.on em{background:rgba(255,255,255,.3);color:#fff}
+.tabsbar .right{margin-left:auto;font-size:11px;color:#a8a29e}
+.tb{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.srch{flex:1;min-width:160px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;color:#a8a29e;background:#fff}
+.srch::before{content:"⌕ ";color:var(--soft)}
+.ob{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 11px;font-weight:600;font-size:12px;white-space:nowrap;color:var(--ink)}
+.ob.amb{border-color:#f59e0b;background:var(--amber-soft);color:var(--amber-deep)}
+.ob.pri{background:linear-gradient(135deg,#f59e0b,#d97706);border-color:transparent;color:#fff}
+.ob.red{background:#fff;border-color:#f3c4bf;color:var(--bad)}
+.ob.sm{padding:3px 9px;font-size:11px;border-radius:6px}
+.ob.dd::after{content:" ▾";color:var(--soft)}
+.ghost{font-size:12px;color:var(--soft);white-space:nowrap}
+.sortseg{display:inline-flex;align-items:center;gap:2px;background:#f5f2ec;border-radius:8px;padding:3px;font-size:11.5px}
+.sortseg span{padding:3px 8px;border-radius:6px;color:var(--ink-2);font-weight:600}
+.sortseg span.lbl{font-size:9.5px;letter-spacing:.08em;color:var(--soft)}
+.sortseg span.on{background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;border:1px solid var(--line);border-radius:10px;padding:12px;background:#fffdfa}
+.f{display:flex;flex-direction:column;gap:3px;font-size:11px;font-weight:600;color:var(--ink-2)}
+.sel{border:1px solid var(--line);border-radius:7px;background:#fff;padding:6px 9px;font-size:12px;font-weight:400;color:var(--ink);display:flex;justify-content:space-between}
+.sel::after{content:"⌄";color:var(--soft)}
+.chk{display:inline-flex;gap:6px;align-items:center;font-size:12px;font-weight:400;color:var(--ink)}
+.chk i{width:13px;height:13px;border:1px solid #a8a29e;border-radius:3px;background:#fff}
+.chk i.on{background:var(--amber);border-color:var(--amber)}
+.at{width:100%;border-collapse:collapse;font-size:12px}
+.at th{text-align:left;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.at td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.at tr:last-child td{border-bottom:0}
+.at .r{text-align:right;font-variant-numeric:tabular-nums}
+.at .po{color:var(--amber-deep);font-weight:700}
+.at .soft{color:var(--soft)}
+.at tr.mrow td{background:#faf8f5;font-size:11.5px;font-weight:700;color:var(--ink-2)}
+.at tr.grp td{background:#f5f2ec;font-weight:600}
+.at tr.kid td{background:#fffdf8}
+.at tr.kid td:first-child{box-shadow:inset 3px 0 0 var(--amber)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.p-info{background:var(--info-bg);color:var(--info)}
+.p-info::before{content:"•"}
+.p-warn{background:var(--warn-bg);color:var(--warn)}
+.p-good{background:var(--good-bg);color:var(--good)}
+.p-goods{background:var(--good);color:#fff}
+.p-bad{background:var(--bad-bg);color:var(--bad)}
+.p-neu{background:#f0efed;color:var(--soft)}
+.tag{display:inline-flex;font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:5px;white-space:nowrap}
+.ban{border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:3px}
+.ban.info{background:#e8f1fb;border:1px solid #c6daf2;color:#174d8c}
+.ban.warn{background:#fdf8e6;border:1px solid #efdfa6;color:#6b520c}
+.ban.good{background:var(--good-bg);border:1px solid #bfe3cb;color:#17603a}
+.ban .row1{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.ban small{font-size:11px;opacity:.85}
+.link{color:var(--amber-deep);font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.kp{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 12px;display:flex;flex-direction:column;gap:2px}
+.kp .l{font-size:11px;color:var(--soft)}
+.kp .v{font-family:var(--display);font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.kp .ft{font-size:10.5px;color:var(--soft)}
+.kp .al{font-size:10.5px;font-weight:700;color:var(--amber-deep)}
+.cols{display:grid;gap:12px}
+.c2{grid-template-columns:1fr 1fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+.c21{grid-template-columns:2fr 1fr}
+.c12{grid-template-columns:1fr 1.15fr}
+.ct{font-family:var(--display);font-weight:700;font-size:13.5px}
+.cs{font-size:11px;color:var(--soft)}
+.side{width:200px;flex:none;background:#fff;border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:3px}
+.side .logo-t{font-family:var(--display);font-weight:800;color:var(--amber-deep);font-size:14px;padding:0 6px 10px}
+.side .ps{display:flex;gap:4px;margin-bottom:8px}
+.side .ps span{flex:1;text-align:center;font-size:11px;font-weight:700;padding:4px 0;border-radius:6px;background:#f0efed;color:var(--soft)}
+.side .ps span.on{background:var(--amber);color:var(--band)}
+.side .it{display:flex;justify-content:space-between;gap:6px;font-size:12px;padding:6px 8px;border-radius:7px;color:var(--ink-2)}
+.side .it small{font-size:10.5px;color:var(--soft)}
+.side .it.on{background:var(--amber-soft);color:var(--ink);font-weight:600}
+.side .gl{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);padding:10px 8px 2px}
+.dlg-stage{background:rgba(28,25,23,.35);padding:22px;display:flex;justify-content:center;align-items:flex-start;gap:16px;min-width:800px;flex-wrap:wrap}
+.dlg{background:#fff;border-radius:14px;padding:16px;box-shadow:0 18px 40px rgba(28,25,23,.25);display:flex;flex-direction:column;gap:10px;width:360px;font-size:12.5px}
+.dlg .dt{font-family:var(--display);font-weight:800;font-size:15px}
+.inp{border:1px solid var(--line);border-radius:7px;background:#fff;padding:6px 9px;font-size:12px;min-height:30px;color:var(--ink)}
+.inp.ph{color:#a8a29e}
+.radio{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:8px;padding:4px;max-height:none}
+.radio div{display:flex;justify-content:space-between;gap:8px;padding:6px 8px;border-radius:6px;font-size:12px}
+.radio div.on{background:var(--amber-soft)}
+.radio small{color:var(--soft)}
+.end{display:flex;justify-content:flex-end;gap:8px;align-items:center}
+.hist{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}
+.hist div{display:flex;justify-content:space-between;gap:8px}
+.toggle{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--good)}
+.toggle i{width:26px;height:15px;border-radius:999px;background:var(--good);position:relative}
+.toggle i::after{content:"";position:absolute;right:2px;top:2px;width:11px;height:11px;border-radius:50%;background:#fff}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:11px}
+.pdf{background:#e7e5e4;border-radius:10px;min-height:150px;display:flex;align-items:center;justify-content:center;color:var(--soft);font-size:11px}
+.pdf div{background:#fff;width:70%;height:130px;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,.1);padding:10px;display:flex;flex-direction:column;gap:5px}
+.pdf div i{display:block;height:5px;background:#e7e5e4;border-radius:3px}
+.mk{position:relative;border-radius:12px;box-shadow:0 0 0 2.5px #6d28d9;}
+.mk.in{box-shadow:inset 0 0 0 2.5px #6d28d9}
+.mk::before{content:attr(data-n);position:absolute;top:-11px;left:-11px;width:22px;height:22px;border-radius:50%;background:#6d28d9;color:#fff;font-family:var(--display);font-weight:800;font-size:11.5px;display:grid;place-items:center;z-index:2;box-shadow:0 0 0 2px #fff}
+.mk.ri::before{left:auto;right:-11px}
+.keylist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
+.keylist li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--ink-2)}
+.keylist li b.n{flex:none;width:22px;height:22px;border-radius:50%;background:#6d28d9;color:#fff;font-family:var(--display);font-weight:800;font-size:11.5px;display:grid;place-items:center;margin-top:1px}
+.keylist li strong{color:var(--ink)}
+@media (max-width:640px){.keylist{grid-template-columns:1fr}}
+
+/* Page menu: a sticky contents rail on the left; a fold-out list on phones */
+.wrap{max-width:1180px}
+.layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:28px;align-items:start}
+main.content{padding-block:30px 48px;display:flex;flex-direction:column;gap:22px;min-width:0}
+section.card{scroll-margin-top:16px}
+.todo-h,h4.todo-sub{scroll-margin-top:16px}
+.toc{position:sticky;top:env(safe-area-inset-top,0px);padding-block:30px 20px;max-height:100vh;overflow-y:auto}
+.toc-in{display:flex;flex-direction:column;gap:1px}
+.toc-h{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--amber-deep);padding:12px 10px 6px}
+.toc-h:first-child{padding-top:0}
+.toc a{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink-2);font-size:13.5px;line-height:1.3;padding:6px 10px;border-radius:7px;border-left:2px solid transparent}
+.toc a:hover{background:#fff;color:var(--ink)}
+.toc a:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+.toc a b{flex:none;width:20px;height:20px;border-radius:50%;background:#e7e5e4;color:var(--ink-2);font-family:var(--display);font-size:11px;display:grid;place-items:center}
+.toc a b.dot{width:20px;height:20px;background:none;position:relative}
+.toc a b.dot::after{content:"";position:absolute;left:7px;top:7px;width:6px;height:6px;border-radius:50%;background:#d6d3d1}
+.toc a.l2{font-weight:600;color:var(--ink);padding-left:12px;margin-top:4px}
+.toc a.l3{font-size:12.5px;padding:4px 10px 4px 22px;color:var(--soft)}
+.toc a.on{background:#fff;color:var(--ink);font-weight:600;border-left-color:var(--amber)}
+.toc a.on b{background:var(--amber);color:var(--band)}
+.toc-m{display:none}
+@media (max-width:980px){
+  .layout{grid-template-columns:1fr;gap:0}
+  .toc{display:none}
+  .toc-m{display:block;margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+  .toc-m summary{cursor:pointer;padding:12px 16px;font-weight:600;font-family:var(--display)}
+  .toc-m .toc-in{padding:0 8px 12px}
+  .toc-m a{display:block;text-decoration:none;color:var(--ink-2);font-size:14px;padding:6px 10px;border-radius:6px}
+  .toc-m a b{display:none}
+  .toc-m a.l2{font-weight:600;color:var(--ink)}
+  .toc-m a.l3{padding-left:22px;font-size:13px}
+  .toc-m .toc-h{padding:10px 10px 4px}
+  main.content{padding-top:18px}
+}
+@media print{.toc,.toc-m{display:none}.layout{display:block}}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.compare>div{border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.compare .was{background:var(--ground);border:1px solid var(--line)}
+.compare .was .eyebrow{color:var(--soft)}
+.compare .now{background:var(--amber-soft);border:1px solid #f7d48a}
+.compare ol,.compare ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:14.5px;color:var(--ink-2)}
+@media (max-width:560px){.compare{grid-template-columns:1fr}}
+.levels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.lv{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--ground);display:flex;flex-direction:column;gap:6px;min-width:0}
+.lv p{font-size:13.5px}
+.lvn{align-self:flex-start;font-family:var(--display);font-weight:800;font-size:13px;border-radius:6px;padding:2px 9px}
+.lvn.off{background:#f0efed;color:var(--soft)}
+.lvn.staff{background:var(--info-bg);color:var(--info)}
+.lvn.admin{background:var(--amber-soft);color:var(--amber-deep);border:1px solid #f7d48a}
+.lvn.super{background:var(--band);color:var(--amber)}
+table.guide.roles td:first-child{width:auto;font-weight:500}
+table.guide.roles th.c,table.guide.roles td.c{text-align:center;width:13%}
+.yes{color:var(--good);font-weight:800;font-size:16px}
+.no{color:#c4c0bb}
+.small-note{font-size:12.5px;color:var(--soft);font-weight:400;margin-top:2px}
+@media (max-width:760px){.levels{grid-template-columns:1fr 1fr}}
+.mkrow{outline:2.5px solid #6d28d9;outline-offset:-2px}
+.rn{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#6d28d9;color:#fff;font-family:var(--display);font-weight:800;font-size:10.5px;margin-right:6px;vertical-align:middle}
+.f.mk{padding:8px 8px 6px 16px}
+.rn+.chk{margin-left:2px}
+.remember{background:var(--band);border-radius:8px;padding:24px 28px;display:flex;gap:18px;align-items:center}
+.remember .logo{width:110px;flex:none}
+.remember p{color:var(--paper);font-family:var(--display);font-weight:700;font-size:22px;line-height:1.25}
+.remember p b{color:var(--amber)}
+footer{font-size:12.5px;color:var(--soft);display:flex;flex-direction:column;gap:4px}
+
+@media (max-width:760px){
+  .journey{grid-template-columns:1fr 1fr}
+  .stop:not(:last-child)::after{display:none}
+  .lanes{display:none}
+  .step{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  section.card{padding:20px 16px}
+  .grid2,.tiles{grid-template-columns:1fr}
+  .supplier{grid-template-columns:1fr}
+  .remember{flex-direction:column;align-items:flex-start}
+}
+@page{size:A4;margin:12mm}
+@media print{
+  body{font-size:13.5px}
+  .wrap{max-width:none;padding-left:0;padding-right:0}
+  .band .wrap,.subbar .wrap{padding-left:22px;padding-right:22px}
+  section.card{padding:18px 20px;break-inside:auto}
+  .step,.mini,.supplier,.remember,.screen,tr{break-inside:avoid}
+  .screen{box-shadow:none}
+}
+</style>
+
+</head>
+<body>
+<header class="band">
+  <div class="wrap">
+    <img class="logo" src="data:image/png;base64,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" alt="DBM Supplies">
+    <h1>Paying suppliers and invoicing customers</h1>
+    <p class="lede">How DBM Supplies' bills and invoices move through the Accounts Portal: what the portal does for you, what you check, and which button to press.</p>
+    <div class="meta"><span>Staff guide</span><span>DBM Supplies</span><span>17 Nov 2026</span></div>
+  </div>
+</header>
+<div class="subbar"><div class="wrap">
+  <span class="chip"><b>AP</b>Bills we pay to suppliers</span>
+  <span class="chip"><b>AR</b>Invoices we send to customers</span>
+</div></div>
+
+<div class="wrap layout"><nav class="toc" aria-label="On this page"><div class="toc-in"><div class="toc-h">Guide</div><a href="#overview" class="l1"><b class="dot"></b>The big picture</a><a href="#getting-in" class="l1"><b>1</b>Getting in</a><a href="#user-access" class="l1"><b class="dot"></b>Who can do what</a><a href="#bills-arrive" class="l1"><b>2</b>Where bills come from</a><a href="#bill-list" class="l1"><b>3</b>Your list of bills</a><a href="#checking" class="l1"><b>4</b>Checking a bill</a><a href="#approving" class="l1"><b>5</b>Approving a bill</a><a href="#credit-notes" class="l1"><b class="dot"></b>Credit notes</a><a href="#invoicing" class="l1"><b>6</b>Invoicing the customer</a><a href="#quick-answers" class="l1"><b class="dot"></b>Quick answers</a><div class="toc-h">To be added</div><a href="#to-be-added" class="l1"><b class="dot"></b>Overview and key</a><a href="#tba-ap" class="l2">AP · supplier bills</a><a href="#tba-ap-ap-home-page" class="l3">Home page</a><a href="#tba-ap-left-menu" class="l3">Left menu</a><a href="#tba-ap-bill-list-tabs-search-and-filters" class="l3">Bill list: filters</a><a href="#tba-ap-bill-list-assigning-and-bulk-actions" class="l3">Bill list: assigning</a><a href="#tba-ap-bill-page" class="l3">Bill page</a><a href="#tba-ap-set-up" class="l3">Set-up</a><a href="#tba-ar" class="l2">AR · customer invoices</a><a href="#tba-ar-ar-home-page-and-menu" class="l3">Home page and menu</a><a href="#tba-ar-sales-orders-list-tabs-search-and-filters" class="l3">Orders list: filters</a><a href="#tba-ar-sales-orders-list-assigning-and-bulk-actions" class="l3">Orders list: assigning</a><a href="#tba-ar-order-page" class="l3">Order page</a><a href="#tba-ar-customers-and-customer-pricing" class="l3">Customers and pricing</a></div></nav><details class="toc-m"><summary>On this page</summary><div class="toc-in"><div class="toc-h">Guide</div><a href="#overview" class="l1"><b class="dot"></b>The big picture</a><a href="#getting-in" class="l1"><b>1</b>Getting in</a><a href="#user-access" class="l1"><b class="dot"></b>Who can do what</a><a href="#bills-arrive" class="l1"><b>2</b>Where bills come from</a><a href="#bill-list" class="l1"><b>3</b>Your list of bills</a><a href="#checking" class="l1"><b>4</b>Checking a bill</a><a href="#approving" class="l1"><b>5</b>Approving a bill</a><a href="#credit-notes" class="l1"><b class="dot"></b>Credit notes</a><a href="#invoicing" class="l1"><b>6</b>Invoicing the customer</a><a href="#quick-answers" class="l1"><b class="dot"></b>Quick answers</a><div class="toc-h">To be added</div><a href="#to-be-added" class="l1"><b class="dot"></b>Overview and key</a><a href="#tba-ap" class="l2">AP · supplier bills</a><a href="#tba-ap-ap-home-page" class="l3">Home page</a><a href="#tba-ap-left-menu" class="l3">Left menu</a><a href="#tba-ap-bill-list-tabs-search-and-filters" class="l3">Bill list: filters</a><a href="#tba-ap-bill-list-assigning-and-bulk-actions" class="l3">Bill list: assigning</a><a href="#tba-ap-bill-page" class="l3">Bill page</a><a href="#tba-ap-set-up" class="l3">Set-up</a><a href="#tba-ar" class="l2">AR · customer invoices</a><a href="#tba-ar-ar-home-page-and-menu" class="l3">Home page and menu</a><a href="#tba-ar-sales-orders-list-tabs-search-and-filters" class="l3">Orders list: filters</a><a href="#tba-ar-sales-orders-list-assigning-and-bulk-actions" class="l3">Orders list: assigning</a><a href="#tba-ar-order-page" class="l3">Order page</a><a href="#tba-ar-customers-and-customer-pricing" class="l3">Customers and pricing</a></div></details><main class="content">
+
+  <section class="card" id="overview">
+    <div class="head">
+      <span class="eyebrow">The big picture</span>
+      <h2>A bill comes in, you approve it, then you invoice the customer</h2>
+    </div>
+    <p>Most of the work happens on its own. You only step in twice: once to approve the supplier's bill, and once to send the customer's invoice.</p>
+    <p>Before the portal, every bill and invoice was handled by hand, across several applications. You found the bill in Outlook, opened the PDF, looked up the order in the DBM Supplies portal, checked each price against the price list, typed the bill into Xero, marked the purchase order billed, then built the customer's invoice and emailed it. Each step meant switching to another screen, and each switch was a chance to miss something.</p>
+    <p>Now the portal does the reading, matching, checking and typing for you. You see the supplier's PDF, our order, the price check and the Xero result together, in one place, and you only make the decisions: approve, fix or query.</p>
+    <div class="compare">
+      <div class="was"><span class="eyebrow">Before · by hand</span>
+        <ol>
+          <li><strong>Outlook:</strong> find the supplier's email and open the PDF</li>
+          <li><strong>DBM Supplies portal:</strong> look up the order and what was sold</li>
+          <li><strong>Price list:</strong> check every line's price and quantity</li>
+          <li><strong>Xero:</strong> type in the bill and mark the order billed</li>
+          <li><strong>Xero and Outlook:</strong> build the customer's invoice and email it</li>
+          <li><strong>Outlook:</strong> file the email away by hand</li>
+        </ol>
+      </div>
+      <div class="now"><span class="eyebrow">Now · in the Accounts Portal</span>
+        <ul>
+          <li>Bills are read from the mailbox by themselves, every 5 minutes</li>
+          <li>Every line is checked against our order and price list for you</li>
+          <li>One click on <strong>Approve</strong> puts the bill in Xero and marks the order billed</li>
+          <li>One click on <strong>Approve &amp; send</strong> invoices and emails the customer</li>
+          <li>Emails are filed into folders for you</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout good">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      <p><strong>No inbox to keep tidy.</strong> Once a bill is read, the portal files its email into the right folder of the invoices@dbmsupplies.com.au mailbox: under the supplier's name, under DBM, or under Other for anything that isn't a bill. Only emails that need a person stay in the Inbox.</p>
+    </div>
+    <div class="lanes" aria-hidden="true"><span>AP: the supplier's bill</span><span>AR: the customer's invoice</span></div>
+    <div class="journey">
+      <div class="stop"><span class="who">Supplier</span><b>Emails the bill</b><p>To payables@dbmsupplies.com.au</p></div>
+      <div class="stop"><span class="who">Portal</span><b>Reads it</b><p>Every 5 minutes, and checks it against our order</p></div>
+      <div class="stop you"><span class="who">You</span><b>Check and approve</b><p>In AP</p></div>
+      <div class="stop"><span class="who">Portal</span><b>Puts it in Xero</b><p>DBM Supplies' own Xero</p></div>
+      <div class="stop you"><span class="who">You</span><b>Approve and send</b><p>In AR, once the order appears</p></div>
+      <div class="stop"><span class="who">Customer</span><b>Gets the invoice</b><p>By email from ar@dbmsupplies.com.au</p></div>
+    </div>
+    <div class="grid2">
+      <div class="mini"><span class="eyebrow">Bills coming in · AP</span><h3>payables@dbmsupplies.com.au</h3><p>Suppliers send DBM Supplies' bills here. Everything is passed straight to invoices@dbmsupplies.com.au, the mailbox the portal reads.</p></div>
+      <div class="mini"><span class="eyebrow">Invoices going out · AR</span><h3>ar@dbmsupplies.com.au</h3><p>Every customer invoice is emailed from here, and a copy of each one is kept in its Sent Items. All of DBM Supplies' customer invoices are in one place.</p></div>
+    </div>
+  </section>
+
+  <section class="card" id="getting-in">
+    <div class="head">
+      <span class="eyebrow">Step 1</span>
+      <h2>Getting in</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-text"><span class="num">1</span><div><h3>Sign in</h3><p>Open the Accounts Portal and sign in with your work Microsoft account, as you do for email.</p></div></div>
+        <div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="step">
+        <div class="step-text"><span class="num">2</span><div><h3>Pick DBM Supplies</h3><p>At the top of the home page, click <strong>DBM Supplies</strong>. If you don't see it, you haven't been given access yet. Ask an admin to turn it on for you.</p></div></div>
+        <div class="screen" aria-label="Drawing of the portal home page">
+          <div class="bar"><i></i><i></i><i></i><span>Accounts Portal · Home</span></div>
+          <div class="body">
+            <div class="switch hl"><span>DBM</span><span class="on">DBM Supplies</span><span>Direct</span></div>
+            <div class="ui-sub">Good morning. Pick where to work.</div>
+            <div class="tiles">
+              <div class="tile"><b>AP</b><span>Accounts Payable · supplier bills</span></div>
+              <div class="tile"><b>AR</b><span>Accounts Receivable · customer invoices</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="step">
+        <div class="step-text"><span class="num">3</span><div><h3>Choose AP or AR</h3><p>Click a tile. Once you're in, the <strong>AP</strong> and <strong>AR</strong> buttons at the top of the left menu switch between them.</p><p>In AP, the menu also lists what DBM Supplies buys and who from. The <strong>prices</strong> pages show DBM Supplies' own prices. You can look but not change them here; prices are changed in the DBM Supplies portal.</p></div></div>
+        <div class="screen" aria-label="Drawing of the AP left menu">
+          <div class="bar"><i></i><i></i><i></i><span>DBM Supplies · AP</span></div>
+          <div class="body">
+            <div class="sidebar">
+              <div class="pills hl"><span class="on">AP</span><span>AR</span></div>
+              <div class="nav on">AP Dashboard</div>
+              <div class="nav-label">What we buy</div>
+              <div class="nav">Waffle Pods <small>Styrofoam</small></div>
+              <div class="nav">Rediwall <small>DBM</small></div>
+              <div class="nav">Reinforcement <small>ARC, DBM</small></div>
+              <div class="nav">Concrete <small>DBM</small></div>
+              <div class="nav-label">Prices</div>
+              <div class="nav">Reinforcement prices <small>view only</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="user-access">
+    <div class="head">
+      <span class="eyebrow">User role access</span>
+      <h2>Who can do what</h2>
+    </div>
+    <p>Every person has a level in each portal: <strong>Off</strong>, <strong>Staff</strong> or <strong>Admin</strong>. DBM Supplies' AP and AR are separate portals from DBM's, so a person can be Staff in DBM Supplies AP, Admin in DBM AP, and Off in DBM Supplies AR, all at once.</p>
+    <div class="levels">
+      <div class="lv"><span class="lvn off">Off</span><p>The portal doesn't show for them. DBM Supplies only appears in the company switch for people with access to it.</p></div>
+      <div class="lv"><span class="lvn staff">Staff</span><p>Does the daily work: checks, approves, rejects, fixes and sends.</p></div>
+      <div class="lv"><span class="lvn admin">Admin</span><p>Everything Staff does, plus handing out and tidying up the work.</p></div>
+      <div class="lv"><span class="lvn super">Super admin</span><p>Admin in every portal of every company, and the only role that manages Users.</p></div>
+    </div>
+    <div class="table-wrap">
+      <table class="guide roles">
+        <thead><tr><th>What you can do</th><th class="c">Staff</th><th class="c">Admin</th><th class="c">Super admin</th></tr></thead>
+        <tbody><tr class="group"><td colspan="4">Looking</td></tr><tr><td>Open DBM Supplies AP or AR, see bills, orders and PDFs</td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td></tr><tr><td>Search, filter, sort, and see each person's open work</td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td></tr><tr><td>View the prices pages<div class="small-note">View only for everyone: prices are changed in the DBM Supplies portal.</div></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td></tr><tr class="group"><td colspan="4">Day-to-day work</td></tr><tr><td>AP: approve, reject, fix lines, Fix PO, Push to Xero again</td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td></tr><tr><td>AP and AR: notes and disputes, including Set to disputed on several orders</td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td></tr><tr><td>AR: Approve &amp; send, Send to customer, Reject, Undo, Edit &amp; resend, line edits, Re-sync</td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td></tr><tr><td>AP: add or edit a supplier under Set-up › Suppliers</td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td></tr><tr class="group"><td colspan="4">Managing the work</td></tr><tr><td>Assign work to a person, or release it</td><td class="c"><span class="no" aria-label="No">—</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td></tr><tr><td>Archive and restore bills, and open the Archived list</td><td class="c"><span class="no" aria-label="No">—</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td></tr><tr><td>Resync the listed bills</td><td class="c"><span class="no" aria-label="No">—</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td></tr><tr><td>Lock months<div class="small-note">Not offered for DBM Supplies yet.</div></td><td class="c"><span class="no" aria-label="No">—</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td></tr><tr class="group"><td colspan="4">Managing people</td></tr><tr><td>Users: add people, set each person's level in each portal, deactivate, reset passwords</td><td class="c"><span class="no" aria-label="No">—</span></td><td class="c"><span class="no" aria-label="No">—</span></td><td class="c"><span class="yes" aria-label="Yes">✓</span></td></tr></tbody>
+      </table>
+    </div>
+    <div class="callout warn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <p><strong>For now, DBM's access counts too.</strong> Saving anything in DBM Supplies' AP (approving, assigning, archiving, Fix PO) also needs <strong>DBM's</strong> AP access. With DBM Supplies access alone you can look but not save, and you'll see "You don't have access to AP".</p>
+        <p>The Admin buttons in AP and AR (Assign work, Archived) also follow your <strong>DBM</strong> level for now. This is being fixed: see <a href="#to-be-added">To be added</a>.</p>
+      </div>
+    </div>
+    <p class="small">To get access, or a different level, ask a super admin. They set it under <strong>Set-up › Users</strong> in DBM Supplies' AP.</p>
+  </section>
+
+  <section class="card" id="bills-arrive">
+    <div class="head">
+      <span class="eyebrow">Step 2 · happens on its own</span>
+      <h2>Where the bills come from</h2>
+    </div>
+    <p>Suppliers email DBM Supplies' bills to <span class="k">payables@dbmsupplies.com.au</span>. That mailbox passes every email straight on to <span class="k">invoices@dbmsupplies.com.au</span>. Every 5 minutes the portal opens invoices@, turns each bill into a bill in AP, and files the email away.</p>
+    <div class="callout good">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      <p><strong>You don't need to forward or type anything in.</strong> If a supplier says they've sent a bill, give it 5 minutes and look in AP.</p>
+    </div>
+    <div>
+      <div class="supplier"><div><b>Styrofoam</b><small>Waffle Pods</small></div><p>Read straight off the bill's PDF. Free lines count too: a $0 scrap bag still counts toward the order.</p></div>
+      <div class="supplier"><div><b>ARC</b><small>Reinforcement</small></div><p>Read straight off the bill's PDF.</p></div>
+      <div class="supplier"><div><b>DBM</b><small>Concrete, Rediwall, Reinforcement</small></div><p>Built from DBM's own sales order to DBM Supplies, with the emailed PDF attached.</p></div>
+      <div class="supplier"><div><b>Anything else</b><small>Stripe notices, receipts</small></div><p>Not a bill, so nothing is made. The email is filed under Other.</p></div>
+    </div>
+    <p class="small">If the portal can't read an ARC or Styrofoam email (for example, there's no invoice number, or it's billed to DBM instead of DBM Supplies), it leaves the email in the mailbox's Inbox for a person to look at.</p>
+  </section>
+
+  <section class="card" id="bill-list">
+    <div class="head">
+      <span class="eyebrow">Step 3</span>
+      <h2>Your list of bills</h2>
+    </div>
+    <p>The <strong>AP Dashboard</strong> lists every bill. The <strong>Pending</strong> tab holds the ones waiting for you. Each bill was checked against DBM Supplies' purchase order: the <strong>DS number</strong> on the bill, like DS1002081.</p>
+    <div class="screen" aria-label="Drawing of the AP bill list">
+      <div class="bar"><i></i><i></i><i></i><span>DBM Supplies · AP Dashboard</span></div>
+      <div class="body">
+        <div class="tabs"><span class="on">Pending<em>2</em></span><span>Disputed</span><span>Approved</span><span>Rejected</span><span>All</span></div>
+        <div class="scroll">
+          <table class="mt" style="min-width:600px">
+            <thead><tr><th>PO Number</th><th>Invoice</th><th>Supplier</th><th>Customer</th><th class="r">Total</th><th>Xero Status</th><th class="r">Actions</th></tr></thead>
+            <tbody>
+              <tr><td>DS1002081</td><td>1180342</td><td>ARC</td><td>Example Builders</td><td class="r">$4,212.40</td><td><span class="badge b-info hl">Ready for Approval</span></td><td class="r"><span class="btn btn-ghost btn-small">Open</span></td></tr>
+              <tr><td>DS1002094</td><td>INV-20871</td><td>Styrofoam</td><td>Sample Homes</td><td class="r">$2,968.00</td><td><span class="badge b-warn hl">Review Required</span></td><td class="r"><span class="btn btn-ghost btn-small">Open</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="mini"><span><span class="badge b-info">Ready for Approval</span></span><h3>Everything matched</h3><p>The order was found, every line is what was ordered at the right price, and it adds up. Have a quick look and approve.</p></div>
+      <div class="mini"><span><span class="badge b-warn">Review Required</span></span><h3>Something needs a look</h3><p>One of those checks didn't pass. The bill's note says which one. Open it and see what's flagged.</p></div>
+    </div>
+  </section>
+
+  <section class="card" id="checking">
+    <div class="head">
+      <span class="eyebrow">Step 4</span>
+      <h2>Checking a bill, line by line</h2>
+    </div>
+    <p>Open a bill to see its lines beside the supplier's PDF. Each line has two coloured labels: one checks the <strong>price</strong>, the other checks the <strong>quantity</strong> against our order. Green means fine.</p>
+    <div class="screen" aria-label="Drawing of a bill's lines">
+      <div class="bar"><i></i><i></i><i></i><span>DBM Supplies · AP · Bill 1180342 from ARC</span></div>
+      <div class="body">
+        <div class="row" style="justify-content:space-between"><div><div class="ui-title">ARC · 1180342</div><div class="ui-sub">PO DS1002081 · Customer: Example Builders</div></div><span class="badge b-warn">Review Required</span></div>
+        <div class="scroll">
+          <table class="mt" style="min-width:720px">
+            <thead><tr><th class="r">Qty</th><th>Item Code</th><th>Description</th><th class="r">Unit Price</th><th class="r">Amount</th><th>Xero Account</th><th><span class="pin">A</span> Price check</th><th><span class="pin">B</span> Order Check</th></tr></thead>
+            <tbody>
+              <tr><td class="r">160</td><td>N12P</td><td>N12 processed bar</td><td class="r">$7.20</td><td class="r">$1,152.00</td><td>310</td><td><span class="badge b-good">✓ Price list OK · $7.20</span></td><td><span class="badge b-good">Qty Matched</span></td></tr>
+              <tr class="flag"><td class="r">180</td><td>N12S6</td><td>N12 6 m straight bar</td><td class="r">$7.28</td><td class="r">$1,310.40</td><td>310</td><td><span class="badge b-bad b-stack"><span>List $7.20 vs Inv $7.28 (+$0.08)</span><strong style="color:inherit">Line +$14.40</strong></span></td><td><span class="badge b-bad">Qty Variance</span></td></tr>
+              <tr><td class="r">1</td><td>FR-CRANE/REO</td><td>Crane delivery</td><td class="r">$1,750.00</td><td class="r">$1,750.00</td><td>310</td><td><span class="badge b-good">✓ Matched with supplier invoice · $1,750.00</span></td><td><span class="badge b-good">Qty Matched</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ui-sub">Example numbers. The second line was billed for 180 bars against 160 ordered, at 8 cents more each.</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="guide">
+        <thead><tr><th>Label you see</th><th>What it means</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr class="group"><td colspan="3">A · Price check</td></tr>
+          <tr><td><span class="badge b-good">✓ Price list OK · $7.20</span></td><td>Charged at DBM Supplies' agreed price.</td><td>Nothing.</td></tr>
+          <tr><td><span class="badge b-info">List $7.20 vs Inv $7.10 (−$0.10)</span></td><td>Cheaper than agreed (blue).</td><td>Nothing.</td></tr>
+          <tr><td><span class="badge b-bad">List $7.20 vs Inv $7.28 (+$0.08)</span></td><td>Dearer than agreed (red). The label shows both prices and the extra cost.</td><td>Ask the supplier, or approve if the new price is right.</td></tr>
+          <tr><td><span class="badge b-good">✓ Free · no charge</span></td><td>A $0 line, such as a free scrap bag.</td><td>Nothing. It still counts toward the order.</td></tr>
+          <tr><td><span class="badge b-good">✓ Matched with supplier invoice</span></td><td>A delivery charge. Delivery is priced per job, so it's taken from the supplier's bill.</td><td>Nothing.</td></tr>
+          <tr><td><span class="badge b-neutral">Not checked · $12.00</span></td><td>There's no agreed price to compare with. Hover over it to see why.</td><td>Check the price looks right.</td></tr>
+          <tr class="group"><td colspan="3">B · Order check</td></tr>
+          <tr><td><span class="badge b-good">Qty Matched</span></td><td>Billed the same amount we ordered.</td><td>Nothing.</td></tr>
+          <tr><td><span class="badge b-bad">Qty Variance</span></td><td>Billed more or less than we ordered, such as 180 against 160.</td><td>Check with the supplier before approving.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout info">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <p><strong>Good to know about ARC.</strong> ARC uses its own item codes. The portal translates them to ours, so don't worry if the codes on the PDF look different.</p>
+        <p>ARC rounds weights on each line, so a weight that's within 1% of the order counts as a match. Things you count, like trench mesh and freight, must match exactly.</p>
+      </div>
+    </div>
+    <p class="small">Each line also shows the <strong>Xero account</strong> it will be posted to, and the bill shows the <strong>customer</strong> the order is for.</p>
+  </section>
+
+  <section class="card" id="approving">
+    <div class="head">
+      <span class="eyebrow">Step 5</span>
+      <h2>Approving a bill</h2>
+    </div>
+    <p>Approving sends the bill to <strong>DBM Supplies' own Xero</strong> (never DBM's), with its PDF attached.</p>
+    <p class="small">For now, approving needs DBM's AP access as well as DBM Supplies'. If Approve says "You don't have access to AP", ask an admin. See <a href="#to-be-added">To be added</a>.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-text"><span class="num">1</span><div><h3>Check the lines against the PDF</h3><p>Look down the two label columns. Anything red needs a decision.</p></div></div>
+        <div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="step">
+        <div class="step-text"><span class="num">2</span><div><h3>Fix anything that's wrong</h3><p>Click the pencil on a line to change its quantity, price, item code or Xero account.</p></div></div>
+        <div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="step">
+        <div class="step-text"><span class="num">3</span><div><h3>Click Approve</h3><p>You'll find it in the <strong>Review &amp; approve</strong> box. If the bill is marked Review Required, type a short note saying why it's OK, for example "ARC confirmed the extra 20 bars".</p><p>Not right? Click <strong>Reject</strong> and give a reason.</p></div></div>
+        <div class="screen" aria-label="Drawing of the Review and approve box">
+          <div class="bar"><i></i><i></i><i></i><span>Bill 1180342 · Review &amp; approve</span></div>
+          <div class="body">
+            <div class="panel">
+              <h4><span class="tick">✓</span>Review &amp; approve</h4>
+              <div class="ui-sub">Approve to push this bill to Xero, or reject it with a reason for whoever sent it.</div>
+              <div class="checks"><span><span class="badge b-good">✓</span>Purchase order found</span><span><span class="badge b-bad">!</span>1 line needs a look</span></div>
+              <div class="note-box">Why is it OK to approve? &nbsp;<span style="color:var(--ink)">ARC confirmed the extra 20 bars.</span></div>
+              <div class="row"><span class="btn btn-primary hl">Approve</span><span class="btn btn-danger">Reject</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-size:18px;margin-top:6px">What the portal does in Xero for you</h3>
+    <div class="grid2">
+      <div class="mini"><h3>Finds the supplier</h3><p>Puts the bill on the supplier's contact in DBM Supplies' Xero.</p></div>
+      <div class="mini"><h3>Won't enter it twice</h3><p>If someone already typed the same bill into Xero, the portal links to it. If the totals differ, it stops so you can check.</p></div>
+      <div class="mini"><h3>Marks the order billed</h3><p>The DS purchase order is marked <strong>Billed</strong> in Xero. It's approved first if it was still waiting.</p></div>
+      <div class="mini"><h3>Records who approved</h3><p>Xero's history shows your name as the approver.</p></div>
+    </div>
+
+    <h3 style="font-size:18px;margin-top:6px">After approving, look at the bill's billing status</h3>
+    <div class="screen" aria-label="Drawing of billing statuses and buttons">
+      <div class="bar"><i></i><i></i><i></i><span>DBM Supplies · AP Dashboard · Approved</span></div>
+      <div class="body">
+        <div class="scroll">
+          <table class="mt" style="min-width:560px">
+            <thead><tr><th>PO Number</th><th>Supplier</th><th>Xero Status</th><th>Billing Status</th><th class="r">Actions</th></tr></thead>
+            <tbody>
+              <tr><td>DS1002081</td><td>ARC</td><td><span class="badge b-good-solid">Approved in Xero</span></td><td><span class="badge b-good-solid">Billed</span></td><td class="r"></td></tr>
+              <tr><td>DS1002077</td><td>DBM</td><td><span class="badge b-good-solid">Approved in Xero</span></td><td><span class="badge b-info">Part billed</span></td><td class="r"><span class="btn btn-ghost btn-small">Close PO</span></td></tr>
+              <tr><td>DS1002063</td><td>Styrofoam</td><td><span class="badge b-good-solid">Approved in Xero</span></td><td><span class="ui-sub">—</span></td><td class="r"><span class="btn btn-ghost btn-small hl">Fix PO</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="guide">
+        <thead><tr><th>You see</th><th>What it means</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-good-solid">Billed</span></td><td>All done.</td><td>Nothing.</td></tr>
+          <tr><td><span class="badge b-info">Part billed</span> and <span class="btn btn-ghost btn-small">Close PO</span></td><td>This bill covers only part of the order, so the order stays open for the next bill.</td><td>Nothing while more bills are coming. <strong>Close PO</strong> doesn't close it for DBM Supplies yet: when the last bill is in, close the PO in DBM Supplies' Xero.</td></tr>
+          <tr><td><span class="btn btn-ghost btn-small">Fix PO</span></td><td>The bill is in Xero, but the order couldn't be marked billed.</td><td>Click <strong>Fix PO</strong> to try again.</td></tr>
+          <tr><td><span class="err" style="display:inline-block">Red message</span> under Review &amp; approve</td><td>Xero didn't accept the bill. The message says why.</td><td>Fix what it says, then click <strong>Push to Xero again</strong>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" id="credit-notes">
+    <div class="head">
+      <span class="eyebrow">Credit notes</span>
+      <h2>Credit notes arrive on their own, but go into Xero by hand for now</h2>
+    </div>
+    <p>When DBM gives DBM Supplies a credit (for example CN-0556), the portal brings it in from DBM's Xero by itself. It shows in AP as <span class="badge b-warn">Review Required</span>, and its reference names the invoice it's crediting.</p>
+    <ul class="plain">
+      <li>Check the amount, and the invoice it credits, against the PDF.</li>
+      <li>A credit from Styrofoam or ARC that arrives by email is read the same way as a bill.</li>
+    </ul>
+    <div class="callout warn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>
+      <p><strong>The portal can't send credit notes to Xero yet.</strong> Enter them in DBM Supplies' Xero yourself.</p>
+    </div>
+  </section>
+
+  <section class="card" id="invoicing">
+    <div class="head">
+      <span class="eyebrow">Step 6 · AR</span>
+      <h2>Invoicing the customer</h2>
+    </div>
+    <p>An order shows up in AR only <strong>after its supplier bill has been approved in AP and is in Xero</strong>. Approve the bill first, and the order follows.</p>
+    <div class="grid2">
+      <div class="mini"><h3>Where the lines come from</h3><p>The customer, items, quantities and prices come from the order in the DBM Supplies portal.</p></div>
+      <div class="mini"><h3>The invoice already exists</h3><p>The DBM Supplies portal has already started the invoice in Xero, numbered like the order (DS1002081). AR finishes that one. It never makes a second invoice.</p></div>
+    </div>
+    <p>The portal compares what the supplier billed with what we sold. It holds an order as <span class="badge b-warn">Review Required</span> when:</p>
+    <ul class="plain">
+      <li>the supplier billed more or less of an item than we sold,</li>
+      <li>we're selling below cost,</li>
+      <li>the order isn't in the DBM Supplies portal, or</li>
+      <li>the customer isn't set up as a contact in Xero.</li>
+    </ul>
+    <div class="steps">
+      <div class="step">
+        <div class="step-text"><span class="num">1</span><div><h3>Open the order and check its lines</h3><p>Use the pencil on a line to fix anything that's wrong.</p></div></div>
+        <div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="step">
+        <div class="step-text"><span class="num">2</span><div><h3>Click Approve &amp; send</h3><p>The portal puts the lines on the invoice in Xero, approves it, and emails it to the customer with the PDF attached, from <span class="k">ar@dbmsupplies.com.au</span>. A copy of every invoice sent is kept in that mailbox's Sent Items.</p><p>Want to hold the email back? Untick <strong>Email it to the customer now</strong>. Send it later with <strong>Send to customer</strong> on the order.</p></div></div>
+        <div class="screen" aria-label="Drawing of the Approve and send window">
+          <div class="bar"><i></i><i></i><i></i><span>DBM Supplies · AR · Order DS1002081</span></div>
+          <div class="body">
+            <div class="dialog">
+              <div class="ui-title">Approve &amp; send</div>
+              <div class="ui-sub">Invoice DS1002081 · Example Builders · $5,410.20</div>
+              <div class="checkbox hl"><i>✓</i><div><strong>Email it to the customer now</strong><div class="ui-sub">Untick to put it in Xero only: it waits there, and "Send to customer" on this page emails it when you're ready.</div></div></div>
+              <div class="row" style="justify-content:flex-end"><span class="btn btn-ghost">Cancel</span><span class="btn btn-primary">Approve &amp; send</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="callout good">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      <p><strong>If the email doesn't go, the approval still counts.</strong> The order shows why, and <strong>Send to customer</strong> tries again. A customer is never sent the same invoice twice.</p>
+    </div>
+  </section>
+
+  <section class="card" id="quick-answers">
+    <div class="head">
+      <span class="eyebrow">If something looks wrong</span>
+      <h2>Quick answers</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="guide">
+        <thead><tr><th>What happened</th><th>Why</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td>A supplier's bill isn't in AP</td><td>The portal couldn't read the email, so it's still in the Inbox of invoices@dbmsupplies.com.au (where payables@ sends everything).</td><td>Check the supplier sent it to payables@dbmsupplies.com.au, then find it in invoices@. If it's a real bill, tell the portal team.</td></tr>
+          <tr><td><span class="badge b-warn">PO Not Found</span></td><td>No DBM Supplies order matches the DS number on the bill.</td><td>Check the DS number on the PDF. Edit it on the bill if it's wrong.</td></tr>
+          <tr><td><span class="badge b-bad">Qty Variance</span></td><td>Billed more or less than we ordered.</td><td>Ask the supplier. Then approve with a note, or wait for a credit.</td></tr>
+          <tr><td>A red message after Approve</td><td>Xero didn't accept the bill. The message says why.</td><td>Fix it, then click <strong>Push to Xero again</strong>.</td></tr>
+          <tr><td><span class="btn btn-ghost btn-small">Fix PO</span> on a bill</td><td>The bill is in Xero, but its order isn't marked billed.</td><td>Click <strong>Fix PO</strong>.</td></tr>
+          <tr><td>An order isn't in AR</td><td>Its supplier bill isn't approved in AP yet.</td><td>Approve the bill in AP first.</td></tr>
+          <tr><td>The customer's email didn't send</td><td>A Microsoft 365 hiccup, or the customer's email address in Xero is wrong.</td><td>Check the contact's email in Xero, then click <strong>Send to customer</strong>.</td></tr>
+          <tr><td>A credit note in AP</td><td>The portal can't send credit notes to Xero yet.</td><td>Enter it in DBM Supplies' Xero by hand.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" id="to-be-added">
+    <div class="head">
+      <span class="eyebrow">To be added</span>
+      <h2>Every function in DBM's AP and AR, and which ones DBM Supplies has yet</h2>
+    </div>
+    <p>DBM Supplies uses the same screens as DBM, but not every DBM function works for DBM Supplies yet. Below, page by page, is everything DBM's AP and AR can do and where DBM Supplies stands today. Where something doesn't work yet, the last column says what to do instead. Under the tables, whole screens show how the missing functions look at DBM today, with sample data. The parts circled in purple are what's coming to DBM Supplies.</p>
+    <div class="legend">
+      <span><span class="status s-ok">Works</span> same as DBM</span>
+      <span><span class="status s-part">Partly</span> works, with a catch</span>
+      <span><span class="status s-not">Not yet</span> to be added</span>
+    </div>
+
+    <div class="watch">
+      <h3>Three things to know first</h3>
+      <ol>
+        <li><strong>Access.</strong> To approve, assign, archive or change a DBM Supplies bill, you currently also need <strong>DBM's</strong> AP access. With DBM Supplies access alone you can look but not save. The same goes for admin-only buttons in AP and AR (Assign work, Archived): they show only to DBM admins.</li>
+        <li><strong>Some buttons show but don't work yet.</strong> Pressing them gives a message that DBM Supplies doesn't do this here. Nothing is changed. They're marked Not yet below.</li>
+        <li><strong>Don't tick "Save to price list" or use "Add to price list"</strong> on a DBM Supplies line. They write to DBM's price lists, not DBM Supplies'.</li>
+      </ol>
+    </div>
+
+    <h3 class="todo-h" id="tba-ap">AP · supplier bills</h3>
+
+    <h4 class="todo-sub" id="tba-ap-ap-home-page">AP home page</h4>
+    <div class="table-wrap"><table class="guide todo"><thead><tr><th>Function</th><th>What it does</th><th>DBM Supplies</th></tr></thead><tbody>
+      <tr><td>Period: This week, This month, Quarter, Financial year</td><td>Changes the period the figures cover.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Bills waiting, and Review waiting bills</td><td>How many bills are open, and a button to the busiest category.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Spend, bills, time to Xero, top suppliers, overcharges caught</td><td>Charts and figures for the period.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Due in the next 7 days</td><td>What we owe suppliers, read back from Xero.</td><td><span class="status s-not">Not yet</span><br>Payments are only read from DBM's Xero. Check what's due in DBM Supplies' Xero.</td></tr>
+      <tr><td>Needs a look: No order found, Charged above the price list, Quantity doesn't match, Didn't reach Xero</td><td>Counts of bills with a problem.</td><td><span class="status s-part">Partly</span><br>"No order found" always shows 0. Use the <strong>Fix PO</strong> button in the list instead.</td></tr>
+      <tr><td>Running costs</td><td>Recent general and admin bills.</td><td><span class="status s-not">Not yet</span><br>Always empty.</td></tr>
+    </tbody></table></div>
+    <div class="pv-intro">Coming to DBM Supplies · how it looks at DBM today, circled</div><div class="shot-wrap"><div class="shot-title"><b>AP home page</b><span class="sample">Sample data</span></div><div class="canvas"><div class="bar"><i></i><i></i><i></i><span>Accounts Portal / dbm-supplies / payables / home</span></div><div class="app"><div class="tb" style="justify-content:space-between"><div><div class="ptitle">Accounts Payable</div><div class="psub">11 bills waiting — the oldest since 3 Nov.</div></div><div class="tb"><div class="sortseg"><span>This week</span><span class="on">This month</span><span>Quarter</span><span>Financial year</span></div><span class="ob pri">Review waiting bills</span></div></div><div class="ban warn mk" data-n="1"><div class="row1"><span>● <strong>2 supplier emails</strong> didn't make it into the portal — couldn't be read, or the sender wasn't recognised.</span><span class="link">See them →</span></div></div><div class="kpis"><div class="kp"><span class="l">Spend this month</span><span class="v">$84,210</span><span class="ft">across 37 bills</span></div><div class="kp"><span class="l">Bills this month</span><span class="v">37</span><span class="ft">26 in Xero</span></div><div class="kp"><span class="l">Overcharges caught</span><span class="v">$412</span><span class="ft">on 5 lines</span></div><div class="kp"><span class="l">Arrival to Xero</span><span class="v">1.4 days</span><span class="ft">on average</span></div><div class="kp mk" data-n="2"><span class="l">Due in the next 7 days</span><span class="v">$18,640</span><span class="ft">6 bills in Xero awaiting payment</span><span class="al">2 overdue · $3,120.00</span><span class="ft">Checked with Xero Tue 3:15 pm</span></div></div><div class="cols c21"><div class="w pad"><div class="ct">Bills in vs sent to Xero</div><svg viewBox="0 0 400 80" style="width:100%;height:80px" aria-hidden="true"><path d="M0 60 L60 50 L120 54 L180 30 L240 38 L300 22 L360 28 L400 18" fill="none" stroke="#f59e0b" stroke-width="2.5"/><path d="M0 66 L60 58 L120 60 L180 42 L240 44 L300 30 L360 34 L400 26" fill="none" stroke="#78716c" stroke-width="2" stroke-dasharray="4 3"/></svg></div><div class="w pad mk" data-n="3"><div class="tb" style="justify-content:space-between"><div><div class="ct">Running costs</div><div class="cs">General &amp; Admin, last 6 bills</div></div><span class="tag p-info">⚡</span></div><svg viewBox="0 0 200 44" style="width:100%;height:44px" aria-hidden="true"><path d="M0 34 L40 26 L80 30 L120 16 L160 22 L200 12 L200 44 L0 44Z" fill="#e8f1fb"/><path d="M0 34 L40 26 L80 30 L120 16 L160 22 L200 12" fill="none" stroke="#1d5fab" stroke-width="2"/></svg><div class="tb" style="justify-content:space-between"><span class="cs">Latest · Origin Energy</span><b>$412.80</b></div></div></div></div></div><ul class="keylist"><li><b class="n">1</b><span><strong>Inbox problems banner.</strong> Tells you when supplier emails didn't make it in, with a link to them.</span></li><li><b class="n">2</b><span><strong>Due in the next 7 days.</strong> What DBM Supplies owes this week and what's overdue, read from its own Xero.</span></li><li><b class="n">3</b><span><strong>Running costs.</strong> General and admin bills, like power and phone, get their own card.</span></li></ul></div>
+
+    <h4 class="todo-sub" id="tba-ap-left-menu">Left menu</h4>
+    <div class="table-wrap"><table class="guide todo"><thead><tr><th>Function</th><th>What it does</th><th>DBM Supplies</th></tr></thead><tbody>
+      <tr><td>Categories with waiting counts</td><td>Opens a category's bills.</td><td><span class="status s-ok">Works</span><br>Concrete, Waffle Pods, Rediwall and Reinforcement.</td></tr>
+      <tr><td>Suppliers list (All suppliers, each supplier, Show more)</td><td>Shows one supplier's bills.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Inbox problems</td><td>Emails the portal couldn't read, with Retry.</td><td><span class="status s-not">Not yet</span><br>Always empty. Look in the Inbox of invoices@dbmsupplies.com.au.</td></tr>
+      <tr><td>Statements</td><td>Suppliers' statements checked against Xero.</td><td><span class="status s-not">Not yet</span><br>Always empty. Check statements in Xero.</td></tr>
+      <tr><td>Locked months</td><td>Closes a reconciled month so nothing new goes to Xero for it.</td><td><span class="status s-not">Not yet</span><br>Not in the menu.</td></tr>
+      <tr><td>Prices pages</td><td>Price lists by material.</td><td><span class="status s-part">Partly</span><br>Waffle Pods, Rediwall and Reinforcement are view only. Concrete is empty.</td></tr>
+    </tbody></table></div>
+    <div class="pv-intro">Coming to DBM Supplies · how it looks at DBM today, circled</div><div class="shot-wrap"><div class="shot-title"><b>Left menu, and the Statements page</b><span class="sample">Sample data</span></div><div class="canvas"><div class="bar"><i></i><i></i><i></i><span>Accounts Portal / dbm-supplies / payables / statements</span></div><div class="app split"><div class="side"><div class="logo-t">DBM Supplies</div><div class="ps"><span class="on">AP</span><span>AR</span></div><div class="it">Home</div><div class="it mk" data-n="1">Inbox problems <small>2</small></div><div class="it on mk" data-n="2">Statements</div><div class="gl">Materials</div><div class="it">Concrete <small>DBM</small></div><div class="it">Waffle Pods <small>Styrofoam</small></div><div class="it">Rediwall <small>DBM</small></div><div class="it">Reinforcement <small>ARC, DBM</small></div><div class="gl">Prices</div><div class="it mk" data-n="3">Concrete prices</div><div class="it">Waffle Pods prices</div><div class="gl">Set-up</div><div class="it">Suppliers</div><div class="it mk" data-n="4">Locked months</div></div><div class="main"><div><div class="ptitle">Statements</div><div class="psub">Suppliers' statements from the invoices inbox, each line checked against Xero and the portal</div></div><div class="w tabsbar"><span class="t on">To check <em>2</em></span><span class="t">Matched <em>9</em></span><span class="t">All</span><span class="t">Replaced</span><span class="right"><span class="ob dd">All suppliers</span></span></div><div class="w"><table class="at"><thead><tr><th>Supplier</th><th>Statement</th><th class="r">They say owed</th><th class="r">Xero owes</th><th class="r">Difference</th><th>Result</th></tr></thead><tbody><tr><td class="po">ARC</td><td>31 Oct 2026</td><td class="r">$24,310.20</td><td class="r">$24,310.20</td><td class="r">$0.00</td><td><span class="pill p-good">Matches Xero</span></td></tr><tr><td class="po">Styrofoam Industries</td><td>31 Oct 2026</td><td class="r">$9,870.00</td><td class="r">$6,902.00</td><td class="r"><span class="pill p-warn">$2,968.00</span></td><td><span class="pill p-warn">1 to look at</span></td></tr><tr><td class="po">DBM</td><td>31 Oct 2026</td><td class="r">$41,120.00</td><td class="r">$40,880.00</td><td class="r"><span class="pill p-warn">$240.00</span></td><td><span class="pill p-warn">Not in Xero</span></td></tr></tbody></table></div><div class="ban warn"><strong>Styrofoam · INV-20871 · $2,968.00 · Not in Xero yet</strong><small>It never reached us, or it's under another supplier.</small></div></div></div></div><ul class="keylist"><li><b class="n">1</b><span><strong>Inbox problems.</strong> Emails the portal couldn't read, with Try again and Mark sorted.</span></li><li><b class="n">2</b><span><strong>Statements.</strong> Each supplier's monthly statement checked line by line against Xero. You only look at what doesn't agree.</span></li><li><b class="n">3</b><span><strong>Concrete prices.</strong> A concrete price page like the other materials, so concrete bills can be price-checked.</span></li><li><b class="n">4</b><span><strong>Locked months.</strong> Close a reconciled month so nothing dated in it goes to Xero by mistake.</span></li></ul></div><div class="shot-wrap"><div class="shot-title"><b>Inbox problems page</b><span class="sample">Sample data</span></div><div class="canvas"><div class="bar"><i></i><i></i><i></i><span>Accounts Portal / dbm-supplies / payables / inbox-problems</span></div><div class="app"><div class="tb" style="justify-content:space-between"><div><div class="ptitle">Inbox problems</div><div class="psub">Supplier emails to invoices@dbmsupplies.com.au that didn't make it into AP</div></div><span class="ob">Sync with Outlook</span></div><div class="w tabsbar"><span class="t on">To deal with <em>2</em></span><span class="t">Sorted</span><span style="width:1px;height:18px;background:var(--line)"></span><span class="t">All <em>2</em></span><span class="t">Couldn't read <em>1</em></span><span class="t">Not recognised <em>1</em></span><span class="t">Sender held <em>0</em></span></div><div class="w pad mk" data-n="1"><div class="tb" style="justify-content:space-between;align-items:flex-start"><div class="tb" style="align-items:flex-start;flex-wrap:nowrap"><span class="pill p-bad">Couldn't read</span><div><b>Tax invoice 20871</b><div class="cs">From Styrofoam Industries &lt;accounts@styrofoam.example&gt; · 14 Nov 2026 · 1 file</div><div class="cs">No invoice number found on the PDF.</div><span class="link" style="font-size:11px">Details</span></div></div><div class="tb"><span class="ob sm">Open in Outlook</span><span class="ob sm mk ri" data-n="2">Try again</span><span class="ob sm pri mk ri" data-n="3">Mark sorted</span></div></div></div><div class="w pad"><div class="tb" style="justify-content:space-between"><div class="tb" style="flex-wrap:nowrap;align-items:flex-start"><span class="pill p-warn">Not recognised</span><div><b>Invoice 5521</b><div class="cs">From billing@unknown-supplier.example · 15 Nov 2026 · 1 file</div></div></div><div class="tb"><span class="ob sm">Open in Outlook</span><span class="ob sm">Try again</span><span class="ob sm pri">Mark sorted</span></div></div></div></div></div><ul class="keylist"><li><b class="n">1</b><span><strong>Each problem email.</strong> What it is, who sent it and why it didn't go in.</span></li><li><b class="n">2</b><span><strong>Try again.</strong> Reads the email again after the cause is fixed, for example a resent PDF.</span></li><li><b class="n">3</b><span><strong>Mark sorted.</strong> Files it away once dealt with, with a note of what was done.</span></li></ul></div><div class="shot-wrap"><div class="shot-title"><b>Locked months page</b><span class="sample">Sample data</span></div><div class="canvas"><div class="bar"><i></i><i></i><i></i><span>Accounts Portal / dbm-supplies / settings / locked-months</span></div><div class="app"><div><div class="ptitle">Locked months</div><div class="psub">Anything from a supplier dated on or before its lock stops on Issues instead of going to Xero.</div></div><div class="w pad mk" data-n="1"><div class="ct">Lock or unlock by hand</div><div class="cs">For a supplier reconciled outside Statements</div><div class="tb" style="margin-top:8px"><div class="sel" style="flex:1">ARC</div><div class="sel" style="flex:1.5">Up to the end of October 2026</div><span class="ob pri">Lock</span></div></div><div class="w"><div class="pad tb" style="justify-content:space-between"><div><div class="ct">Suppliers</div><div class="cs">1 locked · 2 lock when their statement is matched</div></div><span class="ob sm">Turn on for all</span></div><table class="at"><thead><tr><th>Supplier</th><th>Locked up to</th><th>How</th><th>Lock when matched</th></tr></thead><tbody><tr><td>ARC</td><td>31 Oct 2026</td><td class="soft">Statement matched by Kulsum · 4 Nov</td><td class="mk in" data-n="2"><span class="toggle"><i></i>On</span></td></tr><tr><td>Styrofoam Industries</td><td class="soft">Not locked</td><td class="soft">—</td><td><span class="toggle"><i></i>On</span></td></tr><tr><td>DBM</td><td class="soft">Not locked</td><td class="soft">—</td><td class="soft">Off</td></tr></tbody></table></div></div></div><ul class="keylist"><li><b class="n">1</b><span><strong>Lock by hand.</strong> Pick a supplier and a month to stop anything older going to Xero.</span></li><li><b class="n">2</b><span><strong>Lock when matched.</strong> Locks a supplier automatically when its statement is marked matched.</span></li></ul></div><div class="shot-wrap"><div class="shot-title"><b>Concrete prices page</b><span class="sample">Sample data</span></div><div class="canvas"><div class="bar"><i></i><i></i><i></i><span>Accounts Portal / dbm-supplies / concrete-prices</span></div><div class="app"><div class="tb" style="justify-content:space-between"><div><div class="ptitle">Concrete prices</div><div class="psub">Supplier cost and customer prices, read from the DBM Supplies portal.</div></div><span class="ob">Download</span></div><div class="tb" style="justify-content:space-between"><div class="sortseg"><span class="on">Supplier cost price</span><span>Customer price</span></div><span class="cs">View only — prices are changed in the DBM Supplies portal · Live, updated 3:15 pm</span></div><div class="w mk" data-n="1"><div class="pad tb"><div class="srch">Search by item number or description</div><span class="chk"><i class="on"></i>Priced items only</span></div><table class="at"><thead><tr><th>Item number</th><th>Description</th><th class="r">DBM</th></tr></thead><tbody><tr><td class="po">C25-20</td><td>25 MPa, 20 mm aggregate</td><td class="r">$228.00</td></tr><tr><td class="po">C32-20</td><td>32 MPa, 20 mm aggregate</td><td class="r">$246.00</td></tr><tr><td class="po">C40-20</td><td>40 MPa, 20 mm aggregate</td><td class="r">$268.00</td></tr></tbody></table></div></div></div><ul class="keylist"><li><b class="n">1</b><span><strong>Concrete price list.</strong> The same view-only list as Waffle Pods, Rediwall and Reinforcement, so concrete bills get a price check.</span></li></ul></div>
+
+    <h4 class="todo-sub" id="tba-ap-bill-list-tabs-search-and-filters">Bill list: tabs, search and filters</h4>
+    <div class="table-wrap"><table class="guide todo"><thead><tr><th>Function</th><th>What it does</th><th>DBM Supplies</th></tr></thead><tbody>
+      <tr><td>Tabs: Pending, Disputed, Approved, Rejected, All</td><td>Splits bills by who has to act, with counts.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Archived (admins)</td><td>Bills taken out of the way.</td><td><span class="status s-ok">Works</span><br>For DBM AP admins.</td></tr>
+      <tr><td>Search: invoice, PO or supplier</td><td>Finds bills as you type, with suggestions.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Filter: Month</td><td>Bills from one month.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Filter: Billing status (Billed, Not billed)</td><td>Whether the order is marked billed in Xero.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Filter: Status (Ready for Approval, Review Required, Approved in Xero, Rejected)</td><td>Matches the Xero Status column.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Filter: Needs attention</td><td>Failed pushes and orders not found.</td><td><span class="status s-part">Partly</span><br>Catches failed pushes only. Orders not found show a <strong>Fix PO</strong> button instead.</td></tr>
+      <tr><td>Filter: Push status, Type (Invoice, Credit Note), Disputed only</td><td>Narrows the list.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Filter: Customer</td><td>Bills for one customer.</td><td><span class="status s-not">Not yet</span><br>The list of customers is empty. The Customer column still shows on each bill.</td></tr>
+      <tr><td>Filter: Assigned to (Anyone, Mine, Unassigned, a person)</td><td>Whose work it is.</td><td><span class="status s-part">Partly</span><br>Mine and Unassigned work. The people list shows DBM AP staff, not DBM Supplies staff.</td></tr>
+      <tr><td>Clear filters, Sort (Date, Approved, Total), month groups, pages, Refresh</td><td>Tidies and orders the list.</td><td><span class="status s-ok">Works</span></td></tr>
+    </tbody></table></div>
+    <p class="small">The Customer filter is drawn on the bill list screen under the next table.</p>
+
+    <h4 class="todo-sub" id="tba-ap-bill-list-assigning-and-bulk-actions">Bill list: assigning and bulk actions</h4>
+    <div class="table-wrap"><table class="guide todo"><thead><tr><th>Function</th><th>What it does</th><th>DBM Supplies</th></tr></thead><tbody>
+      <tr><td>Tick boxes, Select all, Shift-click a range</td><td>Picks several bills.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Assign work: Assign selected, Assign all matching, Release</td><td>Hands bills to a person, or takes them back.</td><td><span class="status s-part">Partly</span><br>Works for DBM AP admins. You can only pick people with DBM AP access.</td></tr>
+      <tr><td>Open work strip (each person and their count)</td><td>Who has how many open bills; click to filter.</td><td><span class="status s-part">Partly</span><br>Same people limit as above.</td></tr>
+      <tr><td>Archive selected, Restore selected (with reason)</td><td>Hides bills from the lists, or brings them back.</td><td><span class="status s-ok">Works</span><br>For DBM AP admins.</td></tr>
+      <tr><td>Resync matching</td><td>Checks every listed bill again.</td><td><span class="status s-not">Not yet</span><br>Each bill comes back as failed. Bills are checked once, when they arrive.</td></tr>
+      <tr><td>Bills on the same order grouped together</td><td>One row per order, with Show bills.</td><td><span class="status s-not">Not yet</span><br>Bills show one by one.</td></tr>
+      <tr><td>"Sent again" notice</td><td>Warns when a supplier sends the same bill twice.</td><td><span class="status s-not">Not yet</span><br>Never shows. Watch for the "Possible duplicate" warning on the bill page.</td></tr>
+      <tr><td>Fix PO</td><td>Marks the order billed in Xero.</td><td><span class="status s-ok">Works</span><br>Shown on more bills than at DBM.</td></tr>
+      <tr><td>Close PO</td><td>Closes an order that was only partly billed.</td><td><span class="status s-not">Not yet</span><br>It only checks again; the order stays Part billed. Close the PO in DBM Supplies' Xero.</td></tr>
+    </tbody></table></div>
+    <div class="pv-intro">Coming to DBM Supplies · how it looks at DBM today, circled</div><div class="shot-wrap"><div class="shot-title"><b>AP bill list</b><span class="sample">Sample data</span></div><div class="canvas"><div class="bar"><i></i><i></i><i></i><span>Accounts Portal / dbm-supplies / payables?category=WAFFLEPODS</span></div><div class="app"><div><div class="ptitle">Accounts Payable — Waffle Pods</div><div class="psub">Review and approve Waffle Pods supplier invoices</div></div><div class="ban info mk" data-n="1"><div class="row1"><strong>1 invoice was sent again — 1 archived, needs a decision</strong><span style="font-weight:600">Dismiss all</span></div><small>Already here, so not added twice.</small><div><span class="link">Styrofoam Industries Pty Ltd 00024000</span> <span class="cs">received again 10 Nov 2026 01:52 pm</span> <span class="tag p-warn">Archived</span></div></div><div class="w tabsbar"><span class="t on">Pending <em>11</em></span><span class="t">Disputed <em>0</em></span><span class="t">Approved</span><span class="t">Rejected</span><span class="t">All</span><span class="right">Archived 24</span></div><div class="w pad" style="display:flex;flex-direction:column;gap:10px"><div class="tb"><div class="srch">Invoice, PO, supplier…</div><span class="ob">Search</span><span class="ob amb">☰ Filters ˄</span><span class="ob dd">Assign work</span><span class="ob dd">Styrofoam Industries Pty Ltd</span><span class="ghost">Clear filters</span><div class="sortseg"><span class="lbl">SORT</span><span class="on">Date ↓</span><span>Approved</span><span>Total</span></div></div><div class="tb mk" data-n="2" style="background:#f5f2ec;border-radius:10px;padding:8px 10px"><div class="sel" style="min-width:150px">Assign to…</div><span class="ob sm">Assign 3 selected</span><span class="ob sm">Assign all 11 matching</span><span style="width:1px;height:20px;background:var(--line)"></span><span class="ob sm">Resync 11 matching</span><span class="cs">Resynced: 11 succeeded, 0 failed.</span></div><div class="fgrid"><div class="f">Month<div class="sel">All months</div></div><div class="f">Billing status<div class="sel">All billing statuses</div></div><div class="f">Status<div class="sel">All statuses</div></div><div class="f">Needs attention<div class="sel">Everything</div></div><div class="f">Push status<div class="sel">All push statuses</div></div><div class="f">Type<div class="sel">All Types</div></div><div class="f mk" data-n="3">Customer<div class="sel">Example Builders Pty Ltd</div></div><div class="f">Assigned to<div class="sel">Anyone</div></div><div class="f" style="justify-content:center"><span class="chk"><i></i>Disputed only</span></div></div><table class="at"><thead><tr><th></th><th>PO Number</th><th>Invoice</th><th>Supplier</th><th>Customer</th><th class="r">Total</th><th>Xero Status</th><th>Billing Status</th><th class="r">Actions</th></tr></thead><tbody><tr class="mrow"><td colspan="9">November 2026 · 11 bills · $25,800.57</td></tr><tr class="grp mkrow"><td><span class="rn">4</span><span class="chk"><i></i></span></td><td>▼ DS1002077</td><td>3 bills</td><td>Styrofoam Industries</td><td>Example Builders</td><td class="r">$5,771.70</td><td><span class="pill p-info">2 Ready</span> <span class="pill p-good">1 In Xero</span></td><td><span class="pill p-warn">Still to bill</span></td><td class="r"><span class="ob sm">Approve all 2</span></td></tr><tr class="kid"><td><span class="chk"><i></i></span></td><td class="po">DS1002077</td><td>00024879</td><td>Styrofoam Industries</td><td>Example Builders</td><td class="r">$1,923.90</td><td><span class="pill p-info">Ready for Approval</span></td><td class="soft">—</td><td class="r"><span class="ob sm">View</span></td></tr><tr><td><span class="chk"><i></i></span></td><td class="po">DS1002063</td><td>00024861</td><td>Styrofoam Industries</td><td>Sample Homes</td><td class="r">$2,968.00</td><td><span class="pill p-goods">Approved in Xero</span></td><td><span class="pill p-info">Part billed</span> <span class="ob sm mk ri" data-n="5">Close PO</span></td><td class="r"><span class="tb" style="justify-content:flex-end;flex-wrap:nowrap"><span class="ob sm mk ri" data-n="6">🕑</span><span class="ob sm">View</span></span></td></tr></tbody></table></div></div></div><ul class="keylist"><li><b class="n">1</b><span><strong>"Sent again" notice.</strong> If a supplier emails the same bill twice, you're told, and it isn't added a second time.</span></li><li><b class="n">2</b><span><strong>Resync matching.</strong> In the Assign work strip: checks every listed bill again after a price or order changes.</span></li><li><b class="n">3</b><span><strong>Customer filter.</strong> Narrows the list to one customer's jobs.</span></li><li><b class="n">4</b><span><strong>Bills grouped by order.</strong> An order billed in parts shows as one row you can open, with Approve all for the ready ones.</span></li><li><b class="n">5</b><span><strong>Close PO.</strong> Really closes a part-billed order in Xero when the last bill is in.</span></li><li><b class="n">6</b><span><strong>Xero history.</strong> The clock button shows the bill's history and notes from Xero.</span></li></ul></div><div class="shot-wrap"><div class="shot-title"><b>Close PO and Xero history</b><span class="sample">Sample data</span></div><div class="canvas"><div class="bar"><i></i><i></i><i></i><span>Accounts Portal / dbm-supplies / payables</span></div><div class="dlg-stage"><div class="dlg mk" data-n="1"><div class="dt">Close purchase order?</div><div>Close purchase order DS1002063 in Xero as fully billed? Only do this if no more bills are coming for this order — AR will then invoice the customer.</div><div class="end"><span class="ob">Cancel</span><span class="ob pri">OK</span></div></div><div class="dlg mk" data-n="2"><div class="dt">Xero history · 00024861</div><div class="hist"><div><b>Approved</b><span class="cs">15 Nov 2026 10:02 am</span></div><span class="cs">Kulsum (via Accounts Portal)</span></div><div class="hist"><div><b>Created</b><span class="cs">15 Nov 2026 10:01 am</span></div><span class="cs">Accounts Portal · bill from Styrofoam, PO DS1002063</span></div><div class="cs">Xero calls left today: 4,812</div></div></div></div><ul class="keylist"><li><b class="n">1</b><span><strong>Close PO.</strong> Asks once, then closes the order in Xero.</span></li><li><b class="n">2</b><span><strong>Xero history.</strong> History and notes from Xero, without opening Xero. AR orders get the same button.</span></li></ul></div>
+
+    <h4 class="todo-sub" id="tba-ap-bill-page">Bill page</h4>
+    <div class="table-wrap"><table class="guide todo"><thead><tr><th>Function</th><th>What it does</th><th>DBM Supplies</th></tr></thead><tbody>
+      <tr><td>Summary, click a value to show it on the PDF</td><td>The bill's details, linked to the PDF.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Possible duplicate and price warnings</td><td>Warns about a repeated bill or prices off the list.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Line labels: price check and order check</td><td>Green, blue or red against our order and prices.</td><td><span class="status s-ok">Works</span><br>Set when the bill arrives.</td></tr>
+      <tr><td>Edit a line (quantity, price, codes, Xero account, note)</td><td>Corrects a line, then checks it again.</td><td><span class="status s-part">Partly</span><br>Saved as typed, but the labels don't update. Check the line yourself.</td></tr>
+      <tr><td>Add a line</td><td>Adds a missing line.</td><td><span class="status s-part">Partly</span><br>Saved, but not checked. Type the item in.</td></tr>
+      <tr><td>Remove a line (with note)</td><td>Takes a line off the bill.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Match a line by hand</td><td>Ties a line to an order line.</td><td><span class="status s-not">Not yet</span><br>Nothing to pick from.</td></tr>
+      <tr><td>Edit the PO number</td><td>Corrects the order number and checks again.</td><td><span class="status s-not">Not yet</span><br>DS numbers are refused. Tell the portal team.</td></tr>
+      <tr><td>Amount the bank took (foreign currency)</td><td>Records the amount in Australian dollars.</td><td><span class="status s-part">Partly</span><br>Saved, but not checked again.</td></tr>
+      <tr><td>Order's bills and unbilled lines</td><td>What on the order is still to be billed.</td><td><span class="status s-not">Not yet</span><br>Empty.</td></tr>
+      <tr><td>Approve (and Force approve with reason)</td><td>Sends the bill to Xero and marks the order billed.</td><td><span class="status s-ok">Works</span><br>Into DBM Supplies' own Xero.</td></tr>
+      <tr><td>Reject (with reason)</td><td>Turns a bill down.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Push to Xero again</td><td>Retries after Xero refused a bill.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Send as draft, Approve draft in Xero</td><td>Sends a bill to Xero as a draft.</td><td><span class="status s-not">Not yet</span><br>Bills always go in approved.</td></tr>
+      <tr><td>Credit notes to Xero</td><td>Sends a supplier's credit note to Xero.</td><td><span class="status s-not">Not yet</span><br>Enter it in DBM Supplies' Xero by hand.</td></tr>
+      <tr><td>Original invoice on a credit note</td><td>Records which bill a credit refunds.</td><td><span class="status s-not">Not yet</span></td></tr>
+      <tr><td>Credit the customer too?</td><td>Drafts a matching customer credit in AR.</td><td><span class="status s-part">Partly</span><br>Your answer is saved, but no credit reaches AR. Credit the customer in Xero.</td></tr>
+      <tr><td>Edit &amp; resend, Use new version</td><td>Fixes a bill already in Xero, or swaps in the supplier's new copy.</td><td><span class="status s-not">Not yet</span><br>Fix the bill in Xero directly.</td></tr>
+      <tr><td>Add to price list (admins)</td><td>Adds a new item to the price list.</td><td><span class="status s-not">Not yet</span><br>Don't use. It writes to DBM's lists.</td></tr>
+      <tr><td>Dispute: Set to disputed, Resolve</td><td>Flags a bill in dispute, with a note.</td><td><span class="status s-part">Partly</span><br>Saved in the portal, but not copied to Xero's history.</td></tr>
+      <tr><td>Internal notes</td><td>Notes for whoever looks next.</td><td><span class="status s-part">Partly</span><br>Same as disputes.</td></tr>
+      <tr><td>Activity log, Restore an archived bill</td><td>History of changes; un-archives.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>PDF viewer: zoom, pages, draw, highlight, open in new tab</td><td>Reads and marks up the supplier's PDF.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Xero history</td><td>The bill's history from Xero.</td><td><span class="status s-not">Not yet</span><br>Not offered.</td></tr>
+    </tbody></table></div>
+    <div class="pv-intro">Coming to DBM Supplies · how it looks at DBM today, circled</div><div class="shot-wrap"><div class="shot-title"><b>Bill page</b><span class="sample">Sample data</span></div><div class="canvas"><div class="bar"><i></i><i></i><i></i><span>Accounts Portal / dbm-supplies / payables / invoices / 00024879</span></div><div class="app"><div class="tb" style="justify-content:space-between"><div><span class="cs">← Back</span><div class="ptitle">Styrofoam Industries · 00024879</div></div><span class="pill p-warn">Review Required</span></div><div class="ban warn mk" data-n="1"><strong>New version from the supplier</strong><small>1st copy: received 10 Nov, $1,923.90 — already in Xero · 2nd copy (this one): received 13 Nov, $1,870.40</small><div class="mono">− WP-ECAP · 20 × $25.30<br>+ WP-ECAP · 18 × $25.30</div><div><span class="ob sm amb">Use new version</span></div></div><div class="w pad cols c3"><div class="f">Customer<b style="font-size:12.5px">Example Builders Pty Ltd</b></div><div class="f mk" data-n="2">PO Number<span style="font-size:12.5px;font-weight:400">DS1002077 <span class="link">Edit</span></span></div><div class="f">Invoice date<span style="font-size:12.5px;font-weight:400">13 Nov 2026</span></div></div><div class="w"><table class="at"><thead><tr><th class="r">Qty</th><th>Item Code</th><th>Description</th><th class="r">Unit Price</th><th class="r">Amount</th><th>DBM Item &amp; Price</th><th>Order Check</th><th></th></tr></thead><tbody><tr><td class="r">120</td><td>WP-300</td><td>Waffle pod 300 mm</td><td class="r">$9.50</td><td class="r">$1,140.00</td><td><span class="tag p-good">✓ Price list OK · $9.50</span></td><td><span class="pill p-good">Qty Matched</span></td><td class="soft">✎</td></tr><tr class="mkrow"><td class="r"><span class="rn">3</span>18</td><td>WP-ECAP</td><td>End caps</td><td class="r">$25.30</td><td class="r">$455.40</td><td><span class="tag p-good">✓ Price list OK · $25.30</span><div class="cs">Edited from 20 by Kulsum · checked again</div></td><td><span class="pill p-good">Qty Matched</span></td><td class="soft">✎</td></tr><tr><td class="r">1</td><td>WPDEL</td><td>Delivery</td><td class="r">$275.00</td><td class="r">$275.00</td><td><span class="tag p-good">✓ Matched with supplier invoice</span></td><td><span class="pill p-bad">Unmatched</span> <span class="ob sm mk ri" data-n="4">Match</span></td><td class="soft">✎</td></tr></tbody></table></div><div class="cols c12"><div class="w pad mk" data-n="5"><div class="ct">This order's bills (3)</div><div class="cs">DS1002077 · $5,771.70 across all bills</div><div class="ban warn" style="padding:7px 9px;border-radius:7px;margin:6px 0"><small>Still to bill: WP-300 120 of 240</small></div><div class="tb" style="justify-content:space-between"><b>00024879 (this one)</b><span>$1,870.40 <span class="pill p-info">Ready</span></span></div><div class="tb" style="justify-content:space-between"><span class="link">00024802</span><span>$1,923.90 <span class="pill p-good">In Xero</span></span></div><div style="margin-top:6px"><span class="ob sm">Approve all 2 ready bills</span></div></div><div class="w pad" style="display:flex;flex-direction:column;gap:7px"><div class="ct">✓ Review &amp; approve</div><div class="cs">Approve to push this bill to Xero, or reject it with a reason.</div><div class="ban warn mk" data-n="6" style="padding:7px 9px;border-radius:7px"><small>Being corrected: wrong quantity on WP-ECAP. Edit the lines, then Approve &amp; resend — that updates the same bill in Xero.</small></div><div class="tb"><span class="ob pri">Approve &amp; resend</span><span class="ob red">Reject</span></div></div></div></div></div><ul class="keylist"><li><b class="n">1</b><span><strong>New version from the supplier.</strong> A corrected copy from the supplier can replace the bill already in Xero.</span></li><li><b class="n">2</b><span><strong>Edit the PO number.</strong> Fix a wrong DS number and the bill is checked against the right order.</span></li><li><b class="n">3</b><span><strong>Checked again after an edit.</strong> Change a line and its labels update straight away.</span></li><li><b class="n">4</b><span><strong>Match a line by hand.</strong> Pick which order line a bill line belongs to.</span></li><li><b class="n">5</b><span><strong>This order's bills.</strong> The other bills on the same order and what's still to come.</span></li><li><b class="n">6</b><span><strong>Edit &amp; resend.</strong> Correct a bill already in Xero and update the same Xero bill.</span></li></ul></div><div class="shot-wrap"><div class="shot-title"><b>Bill page: credit notes, drafts and price list</b><span class="sample">Sample data</span></div><div class="canvas"><div class="bar"><i></i><i></i><i></i><span>Accounts Portal / dbm-supplies / payables / invoices / CR-0412</span></div><div class="dlg-stage"><div class="dlg mk" data-n="1"><div class="dt">Credit the customer too?</div><div class="cs">Yes sends this credit to AR, which drafts a credit for the customer on the same order, at their own prices.</div><div class="tb"><span class="ob pri">Yes, credit the customer</span><span class="ob">No</span></div><div class="ban good" style="padding:7px 9px;border-radius:7px"><small>In AR for approval: $312.40 inc GST · Customer: Example Builders</small></div><div class="f mk" data-n="2">Original invoice<div class="tb"><div class="inp" style="flex:1">00024802</div><span class="ob sm pri">Save</span></div><span class="cs" style="font-weight:400">Goes to Xero beside the PO, e.g. DS1002077 | Inv 00024802</span></div><div class="end"><span class="ob pri">Approve</span><span class="ob red">Reject</span></div></div><div class="dlg mk" data-n="3"><div class="dt">Approve to Xero</div><div class="cs">This pushes 77120 to Xero as a bill and can't be undone.</div><div class="sortseg" style="align-self:flex-start"><span>Bill</span><span class="on">Draft</span></div><div class="cs">Made as a draft bill in Xero, for someone to check and approve there.</div><div class="end"><span class="ob">Cancel</span><span class="ob pri">Approve to Xero as draft</span></div></div><div class="dlg mk" data-n="4"><div class="dt">Edit line item</div><span class="link" style="font-size:11.5px">Not in the list? + Add to price list</span><div class="w pad" style="background:#f5f2ec;display:flex;flex-direction:column;gap:6px"><div class="f">DBM Supplies item number<div class="inp">WP-ECAP</div></div><div class="cols c2"><div class="f">Their price (ex GST)<div class="inp">$25.30</div></div><div class="f">Their code (as printed)<div class="inp">EC-300</div></div></div></div><div class="end"><span class="ghost">Cancel</span><span class="ob pri">Add to price list</span></div></div><div class="dlg mk" data-n="5"><div class="dt">Manual Match Line</div><div class="cs">Bill line: WPDEL Delivery · 1 @ $275.00</div><span class="chk"><i></i>No PO required</span><div class="radio"><div class="on"><span>◉ WPDEL Delivery</span><small>1 @ $275.00</small></div><div><span>○ WP-300 Waffle pod 300 mm</span><small>240 @ $9.50</small></div></div><div class="inp ph">Note</div><div class="end"><span class="ob">Cancel</span><span class="ob pri">Save Match</span></div></div></div></div><ul class="keylist"><li><b class="n">1</b><span><strong>Credit the customer too?.</strong> Saying Yes drafts the matching customer credit in AR.</span></li><li><b class="n">2</b><span><strong>Credit notes to Xero.</strong> Credit notes are approved into DBM Supplies' Xero like bills, linked to the invoice they refund.</span></li><li><b class="n">3</b><span><strong>Send as a draft.</strong> Running-cost bills can go to Xero as drafts to check there first.</span></li><li><b class="n">4</b><span><strong>Add to price list.</strong> A new item on a bill is added to DBM Supplies' own price list.</span></li><li><b class="n">5</b><span><strong>Match a line by hand.</strong> Choose the order line a bill line belongs to.</span></li></ul></div>
+
+    <h4 class="todo-sub" id="tba-ap-set-up">Set-up</h4>
+    <div class="table-wrap"><table class="guide todo"><thead><tr><th>Function</th><th>What it does</th><th>DBM Supplies</th></tr></thead><tbody>
+      <tr><td>Suppliers: list, Add supplier, Edit</td><td>Supplier details such as Xero contact and price tolerance.</td><td><span class="status s-ok">Works</span><br>Saving needs DBM AP access.</td></tr>
+      <tr><td>Users</td><td>Who can use DBM Supplies' AP and AR.</td><td><span class="status s-ok">Works</span><br>For super admins.</td></tr>
+    </tbody></table></div>
+
+    <h3 class="todo-h" id="tba-ar">AR · customer invoices</h3>
+
+    <h4 class="todo-sub" id="tba-ar-ar-home-page-and-menu">AR home page and menu</h4>
+    <div class="table-wrap"><table class="guide todo"><thead><tr><th>Function</th><th>What it does</th><th>DBM Supplies</th></tr></thead><tbody>
+      <tr><td>Period picker, figures and charts (invoiced, margin, top customers)</td><td>Sales figures for the period.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Needs a look: To review, Price or total doesn't match, Supplier bill came late, Didn't reach Xero</td><td>Counts of orders with a problem.</td><td><span class="status s-part">Partly</span><br>"Supplier bill came late" and "Didn't reach Xero" always show 0.</td></tr>
+      <tr><td>Review waiting orders, Shortcuts to Customers</td><td>Quick links.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Shortcuts to Customer price lists and Concrete prices</td><td>Quick links.</td><td><span class="status s-not">Not yet</span><br>Both pages are empty.</td></tr>
+      <tr><td>Menu: categories and suppliers with counts</td><td>Opens a category's or supplier's orders.</td><td><span class="status s-ok">Works</span></td></tr>
+    </tbody></table></div>
+
+    <h4 class="todo-sub" id="tba-ar-sales-orders-list-tabs-search-and-filters">Sales orders list: tabs, search and filters</h4>
+    <div class="table-wrap"><table class="guide todo"><thead><tr><th>Function</th><th>What it does</th><th>DBM Supplies</th></tr></thead><tbody>
+      <tr><td>Tabs: Pending, Disputed, Approved, Rejected, All</td><td>Splits orders by who has to act, with counts.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Archived (admins)</td><td>Orders taken out of the way.</td><td><span class="status s-ok">Works</span><br>For DBM AR admins.</td></tr>
+      <tr><td>Search: order, customer, PO, site</td><td>Finds orders.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Filter: Month, Customer</td><td>Narrows the list.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Filter: Needs attention</td><td>Held, failed or late orders.</td><td><span class="status s-part">Partly</span><br>Catches held orders only.</td></tr>
+      <tr><td>Filter: Assigned to (Anyone, Mine, Unassigned, a person)</td><td>Whose work it is.</td><td><span class="status s-part">Partly</span><br>The people list shows DBM AR staff, including some without DBM Supplies access.</td></tr>
+      <tr><td>Clear filters, Sort, month groups, pages, Refresh</td><td>Tidies and orders the list.</td><td><span class="status s-ok">Works</span></td></tr>
+    </tbody></table></div>
+
+    <h4 class="todo-sub" id="tba-ar-sales-orders-list-assigning-and-bulk-actions">Sales orders list: assigning and bulk actions</h4>
+    <div class="table-wrap"><table class="guide todo"><thead><tr><th>Function</th><th>What it does</th><th>DBM Supplies</th></tr></thead><tbody>
+      <tr><td>Tick boxes, Select all</td><td>Picks several orders.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Set to disputed (several at once)</td><td>Puts ticked orders in dispute with one reason.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Assign work: Assign selected, Assign all matching, Release</td><td>Hands orders to a person.</td><td><span class="status s-part">Partly</span><br>Needs someone who is an admin in both DBM's and DBM Supplies' AR. Only pick people who have DBM Supplies access.</td></tr>
+      <tr><td>Re-sync an order</td><td>Rebuilds the order from the DBM Supplies portal, keeping hand edits.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Sync prices</td><td>Reloads customer prices and updates open orders.</td><td><span class="status s-not">Not yet</span><br>The button shows but doesn't work.</td></tr>
+      <tr><td>Xero history</td><td>The invoice's history from Xero.</td><td><span class="status s-not">Not yet</span><br>Not offered.</td></tr>
+    </tbody></table></div>
+    <div class="pv-intro">Coming to DBM Supplies · how it looks at DBM today, circled</div><div class="shot-wrap"><div class="shot-title"><b>AR sales orders list</b><span class="sample">Sample data</span></div><div class="canvas"><div class="bar"><i></i><i></i><i></i><span>Accounts Portal / dbm-supplies / receivables?category=WAFFLEPODS</span></div><div class="app"><div class="tb" style="justify-content:space-between"><div><div class="ptitle">Accounts Receivable — Waffle Pods</div><div class="psub">Check and invoice Waffle Pods sales orders</div></div><div class="mk ri" data-n="1" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding:4px"><span class="ob">⟳ Sync prices <span class="cs">· 24m</span></span><span class="cs">3 prices changed — 2 open orders updated.</span></div></div><div class="w tabsbar"><span class="t on">Pending <em>4</em></span><span class="t">Disputed <em>0</em></span><span class="t">Approved</span><span class="t">Rejected</span><span class="t">All</span><span class="right">Archived 24</span></div><div class="w pad" style="display:flex;flex-direction:column;gap:10px"><div class="tb"><div class="srch">Order, customer, PO…</div><span class="ob">Search</span><span class="ob">☰ Filters</span><span class="ob dd">Assign work</span><div class="sortseg"><span class="lbl">SORT</span><span class="on">Date ↓</span><span>Approved</span><span>Total</span></div></div><table class="at"><thead><tr><th>Order</th><th>Invoice</th><th>Customer</th><th class="r">Total</th><th class="r">Margin</th><th>Xero Status</th><th>AP Status</th><th class="r">Actions</th></tr></thead><tbody><tr class="mrow"><td colspan="8">November 2026 · 4 orders · $14,212.30</td></tr><tr><td class="po">DS1002094</td><td>00024861</td><td>Sample Homes</td><td class="r">$3,410.00</td><td class="r">14.8%</td><td><span class="pill p-info">Ready for Approval</span></td><td><span class="pill p-good">Approved</span></td><td class="r"><span class="tb" style="justify-content:flex-end;flex-wrap:nowrap"><span class="ob sm mk ri" data-n="2">🕑</span><span class="ob sm">View</span></span></td></tr><tr><td class="po">DS1002081</td><td>1180342</td><td>Example Builders</td><td class="r">$5,410.20</td><td class="r">12.1%</td><td><span class="pill p-goods">Approved in Xero</span></td><td><span class="pill p-good">Approved</span></td><td class="r"><span class="tb" style="justify-content:flex-end;flex-wrap:nowrap"><span class="ob sm">🕑</span><span class="ob sm">View</span></span></td></tr></tbody></table></div></div></div><ul class="keylist"><li><b class="n">1</b><span><strong>Sync prices.</strong> Reloads customer prices from the DBM Supplies portal; open orders pick up the new prices.</span></li><li><b class="n">2</b><span><strong>Xero history.</strong> The invoice's history and notes from Xero.</span></li></ul></div>
+
+    <h4 class="todo-sub" id="tba-ar-order-page">Order page</h4>
+    <div class="table-wrap"><table class="guide todo"><thead><tr><th>Function</th><th>What it does</th><th>DBM Supplies</th></tr></thead><tbody>
+      <tr><td>Held reasons, dispute banner, totals and margin</td><td>Why an order is held, and what it's worth.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Approve &amp; send, Approve anyway</td><td>Finishes and approves the invoice in Xero, then emails it.</td><td><span class="status s-ok">Works</span><br>Waits until the DBM Supplies portal has made the invoice.</td></tr>
+      <tr><td>Send to customer</td><td>Emails an approved invoice.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Reject, Undo reject</td><td>Stops an order being invoiced, or undoes that.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Edit &amp; resend, Approve &amp; resend, Cancel edit</td><td>Reopens an approved order to change it.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Edit, remove, restore or undo a line</td><td>Changes the invoice lines.</td><td><span class="status s-ok">Works</span><br>To swap an item, remove the line and add the right one.</td></tr>
+      <tr><td>Add line, Add to order (from the supplier's bill)</td><td>Adds items to the invoice.</td><td><span class="status s-part">Partly</span><br>Prices don't fill in: type each price. The item picker is empty unless you add from the supplier's bill.</td></tr>
+      <tr><td>Price check against the customer's price</td><td>Marks each line OK or flagged.</td><td><span class="status s-not">Not yet</span><br>Every line says "Not on price list". Check against the order in the DBM Supplies portal.</td></tr>
+      <tr><td>Save to price list (admins)</td><td>Keeps a typed price for next time.</td><td><span class="status s-not">Not yet</span><br>Don't tick it. It writes to DBM's lists.</td></tr>
+      <tr><td>Credit the customer, customer credit cards, credit page</td><td>Raises and approves customer credits.</td><td><span class="status s-not">Not yet</span><br>The button shows but doesn't work. Raise credits in Xero.</td></tr>
+      <tr><td>Late supplier bill notice (dismiss with reason)</td><td>Flags a supplier bill that came after invoicing.</td><td><span class="status s-not">Not yet</span><br>Never shows.</td></tr>
+      <tr><td>Supplier bill PDF, internal notes, disputes, activity log</td><td>The bill beside the order, and the team's notes and history.</td><td><span class="status s-ok">Works</span></td></tr>
+    </tbody></table></div>
+    <div class="pv-intro">Coming to DBM Supplies · how it looks at DBM today, circled</div><div class="shot-wrap"><div class="shot-title"><b>Order page</b><span class="sample">Sample data</span></div><div class="canvas"><div class="bar"><i></i><i></i><i></i><span>Accounts Portal / dbm-supplies / receivables / orders / DS1002081</span></div><div class="app"><div class="tb" style="justify-content:space-between"><div><span class="cs">← Back</span><div class="ptitle">DS1002081 · Example Builders Pty Ltd</div></div><span class="pill p-good">Invoice sent to customer on 15 Nov</span></div><div class="ban warn mk" data-n="1"><strong>Supplier billed this order again after it was invoiced</strong><small>Delivery fee $180.00 on Styrofoam bill 00024901 · Noticed 16 Nov 2:10 pm</small><div class="row1"><small>To charge it, use <strong>Edit &amp; resend</strong> below — the order is rebuilt from every bill.</small><span class="ob sm">Nothing to charge — dismiss</span></div></div><div class="w"><table class="at"><thead><tr><th class="r">Qty</th><th>Item Code</th><th>Description</th><th class="r">Unit Price</th><th class="r">Amount</th><th>DBM Item &amp; Price</th><th>Supplier Bill Check</th></tr></thead><tbody><tr class="mkrow"><td class="r"><span class="rn">2</span>120</td><td>WP-300</td><td>Waffle pod 300 mm</td><td class="r">$9.50</td><td class="r">$1,140.00</td><td><span class="tag p-good">✓ Price list OK · $9.50</span></td><td><span class="pill p-good">Qty Matched</span></td></tr><tr><td class="r">40</td><td>WP-225</td><td>Waffle pod 225 mm</td><td class="r">$7.10</td><td class="r">$284.00</td><td><span class="tag p-warn">Price list $6.50</span></td><td><span class="pill p-good">Qty Matched</span></td></tr><tr><td class="r">20</td><td>WP-ECAP</td><td>End caps</td><td class="r">$25.30</td><td class="r">$506.00</td><td><span class="tag p-good">✓ Price list OK · $25.30</span></td><td><span class="pill p-good">Qty Matched</span></td></tr></tbody></table></div><div class="cols c12"><div class="w pad mk" data-n="3" style="display:flex;flex-direction:column;gap:7px"><div class="tb" style="justify-content:space-between"><div><div class="ct">Customer credit — supplier credit CR-0412</div><div class="cs">$312.40 inc GST</div></div><span class="pill p-good">Ready to approve</span></div><table class="at"><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Price</th><th class="r">Total</th></tr></thead><tbody><tr><td>WP-ECAP</td><td class="r">2</td><td class="r">$25.30</td><td class="r">$50.60</td></tr></tbody></table><div class="tb" style="justify-content:space-between"><span class="cs">Credit total <b style="color:var(--ink)">$55.66</b></span><span class="tb"><span class="ob sm">Start again</span><span class="ob sm pri">Approve credit</span></span></div></div><div class="w pad" style="display:flex;flex-direction:column;gap:7px"><div class="ct">Approved &amp; sent ✓</div><div class="cs">Invoice DS1002081 · $5,410.20 · emailed 15 Nov</div><div class="tb"><span class="ob">Send to customer</span><span class="ob">Edit &amp; resend</span><span class="ob mk ri" data-n="4">Credit the customer</span></div></div></div></div></div><ul class="keylist"><li><b class="n">1</b><span><strong>Late supplier bill notice.</strong> If a supplier bills more after the invoice has gone, the order tells you so it can be charged on.</span></li><li><b class="n">2</b><span><strong>Price check.</strong> Each line is checked against the customer's level (A, B, C or Barton), so a wrong price stands out.</span></li><li><b class="n">3</b><span><strong>Customer credits.</strong> Credits passed on from suppliers, priced at the customer's rates, ready to approve.</span></li><li><b class="n">4</b><span><strong>Credit the customer.</strong> Raise a credit for an overcharge straight from the order.</span></li></ul></div><div class="shot-wrap"><div class="shot-title"><b>Order page: credits and saving prices</b><span class="sample">Sample data</span></div><div class="canvas"><div class="bar"><i></i><i></i><i></i><span>Accounts Portal / dbm-supplies / receivables / orders / DS1002081</span></div><div class="dlg-stage"><div class="dlg mk" data-n="1" style="width:420px"><div class="dt">Credit the customer — DS1002081</div><div class="cs">Tick each line to credit and give the amount per unit to give back, or type the right price.</div><span class="chk"><i class="on"></i><span>WP-ECAP · End caps <span class="cs">Charged 20 × $25.30 = $506.00</span></span></span><div class="cols c3"><div class="f">Qty<div class="inp">20</div></div><div class="f">Right price<div class="inp">$24.00</div></div><div class="f">Credit per unit<div class="inp">$1.30</div></div></div><div class="f">Why?<div class="inp">Charged $25.30 for end caps; their price is $24.00</div></div><div class="w pad" style="background:#f5f2ec;font-size:11.5px">Credit $26.00 ex GST · $28.60 inc GST — saved for approval; nothing goes to Xero yet.</div><div class="end"><span class="ob">Cancel</span><span class="ob pri">Save credit</span></div></div><div class="dlg mk" data-n="2"><div class="dt">Edit line</div><div class="cols c2"><div class="f">Qty<div class="inp">20</div></div><div class="f">Unit price<div class="inp">$24.00</div></div></div><div class="w pad" style="background:#f5f2ec;display:flex;flex-direction:column;gap:6px"><span class="chk"><i class="on"></i><span>Save <b>$24.00</b> as <b>WP-ECAP</b>'s price (ex-GST)</span></span><span class="cs">◉ Standard Price (every customer) &nbsp; ○ Only Example Builders</span></div><div class="f">Reason for the change<div class="inp ph">e.g. agreed price on the quote</div></div><div class="end"><span class="ob">Cancel</span><span class="ob pri">Save</span></div></div></div></div><ul class="keylist"><li><b class="n">1</b><span><strong>Credit the customer.</strong> Pick the lines and the right price; the credit waits for approval before it goes to Xero.</span></li><li><b class="n">2</b><span><strong>Save to price list.</strong> Keep a typed price in DBM Supplies' list for next time, for everyone or one customer.</span></li></ul></div>
+
+    <h4 class="todo-sub" id="tba-ar-customers-and-customer-pricing">Customers and customer pricing</h4>
+    <div class="table-wrap"><table class="guide todo"><thead><tr><th>Function</th><th>What it does</th><th>DBM Supplies</th></tr></thead><tbody>
+      <tr><td>Customer list and search</td><td>Customers and whether they're linked to Xero.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Match against Xero</td><td>Links customers to their Xero contacts by name.</td><td><span class="status s-ok">Works</span></td></tr>
+      <tr><td>Import from Xero</td><td>Pulls in every Xero customer.</td><td><span class="status s-not">Not yet</span><br>Customers come from sales orders.</td></tr>
+      <tr><td>Customer price lists, Reload from partner portal</td><td>Each customer's agreed prices.</td><td><span class="status s-not">Not yet</span><br>Customer levels stay in the DBM Supplies portal.</td></tr>
+    </tbody></table></div>
+    <div class="pv-intro">Coming to DBM Supplies · how it looks at DBM today, circled</div><div class="shot-wrap"><div class="shot-title"><b>Customers and customer pricing</b><span class="sample">Sample data</span></div><div class="canvas"><div class="bar"><i></i><i></i><i></i><span>Accounts Portal / dbm-supplies / receivables / customers</span></div><div class="app"><div class="tb" style="justify-content:space-between"><div><div class="ptitle">Customers</div><div class="psub">Who the orders get invoiced to, and whether Xero knows them.</div></div><div class="tb"><span class="ob mk ri" data-n="1">Import from Xero</span><span class="ob">Match against Xero</span></div></div><div class="ban good"><small>Fetched 48 customers from Xero: 46 added, 2 linked (names), 5 missing emails filled.</small></div><div class="w mk" data-n="2"><div class="pad tb" style="justify-content:space-between"><div><div class="ct">Customer pricing</div><div class="cs">The agreed rate per customer, and the revenue account each item posts to.</div></div><span class="ob">Reload from DBM Supplies portal</span></div><div class="pad tb" style="padding-top:0"><div class="sel" style="min-width:170px">Standard Price</div><div class="srch">Search code or description…</div></div><table class="at"><thead><tr><th>Item Code</th><th>Description</th><th>Revenue Account</th><th>Tax</th><th class="r">Agreed Price</th><th>From</th></tr></thead><tbody><tr><td class="po">WP-300</td><td>Waffle pod 300 mm</td><td>200 · Sales</td><td>GST</td><td class="r">$9.50</td><td class="soft">Level A</td></tr><tr><td class="po">WP-225</td><td>Waffle pod 225 mm</td><td>200 · Sales</td><td>GST</td><td class="r">$6.50</td><td class="soft">Level A</td></tr><tr><td class="po">N12S6</td><td>N12 6 m straight bar</td><td>200 · Sales</td><td>GST</td><td class="r">$9.80</td><td class="soft">Barton Level</td></tr></tbody></table></div></div></div><ul class="keylist"><li><b class="n">1</b><span><strong>Import from Xero.</strong> Bring in all of DBM Supplies' Xero customers at once.</span></li><li><b class="n">2</b><span><strong>Customer pricing.</strong> Each customer's agreed prices and Xero accounts, loaded from the DBM Supplies portal.</span></li></ul></div>
+
+    <p class="small">Not part of DBM Supplies: DBM's Platform Fees, Buying Group, Collections and HR portals. AR functions marked Works are ready in the portal, but most haven't been used on a DBM Supplies order yet; so far one order has been approved and emailed.</p>
+  </section>
+
+  <div class="remember">
+    <img class="logo" src="data:image/png;base64,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" alt="" aria-hidden="true">
+    <p>Approve the supplier's bill in <b>AP</b> first. The customer's order then appears in <b>AR</b>.</p>
+  </div>
+
+  <footer>
+    <p>The screens on this page are drawings of the portal with example numbers and names, not real bills or customers.</p>
+    <p>For anything not covered here, ask the portal team and include a screenshot of the bill or order.</p>
+  </footer>
+</main></div>
+
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('.toc a'));
+  var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a;});
+  var targets=Object.keys(map).map(function(id){return document.getElementById(id);}).filter(Boolean);
+  function update(){
+    var y=window.innerHeight*0.25,cur=null;
+    targets.forEach(function(t){if(t.getBoundingClientRect().top<=y)cur=t;});
+    links.forEach(function(a){a.classList.remove('on');});
+    if(cur&&map[cur.id]){map[cur.id].classList.add('on');var r=map[cur.id].getBoundingClientRect(),n=document.querySelector('.toc');if(n&&(r.top<0||r.bottom>window.innerHeight))map[cur.id].scrollIntoView({block:'nearest'});}
+  }
+  window.addEventListener('scroll',update,{passive:true});update();
+  [].slice.call(document.querySelectorAll('.toc-m a')).forEach(function(a){a.addEventListener('click',function(){a.closest('details').open=false;});});
+})();
+</script>
+
+</body>
+</html>
