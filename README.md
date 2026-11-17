@@ -13,6 +13,15 @@ How DBM Supplies' supplier bills (AP) and customer invoices (AR) work in the Acc
 | [dbm-supplies-ap-ar-guide.pdf](AP-AR-User-Guide/dbm-supplies-ap-ar-guide.pdf) | Reading on screen or printing. The contents list on page 1 is clickable. |
 | [dbm-supplies-ap-ar-guide.html](AP-AR-User-Guide/dbm-supplies-ap-ar-guide.html) | Download and open in a browser: the menu on the left stays on screen as you scroll. |
 
-The screens in the guide are drawings of the portal with sample data, not real bills or customers.
+## Collections user guide (17 Nov 2026)
+
+How DBM Supplies' Collections works in the Accounts Portal: getting in, who can do what, your list for the day, each customer's file, credit limits and reports.
+
+| File | Best for |
+|---|---|
+| [dbm-supplies-collections-guide.pdf](Collections-User-Guide/dbm-supplies-collections-guide.pdf) | Reading on screen or printing. The contents list on page 1 is clickable. |
+| [dbm-supplies-collections-guide.html](Collections-User-Guide/dbm-supplies-collections-guide.html) | Download and open in a browser: the menu on the left stays on screen as you scroll. |
+
+The screens in the guides are drawings of the portal with sample data, not real bills or customers.
 
 Questions: ask the portal team, with a screenshot of the bill or order.

@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DBM Supplies Collections Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* The DBM Supplies guides' look (as the AP and AR guide): a stone-black title band with the amber logo,
+   then white cards. Amber for steps and buttons; Collections' own colours inside the drawn screens.
+   One light look, because staff print it. */
+:root{
+  --band:#1c1917;--band-2:#292524;--amber:#f59e0b;--amber-deep:#b45309;--amber-soft:#fffbeb;
+  --paper:#f5f3ef;--ground:#faf8f5;--line:#e7e5e4;--surface:#fff;--ink:#1c1917;--ink-2:#57534e;--soft:#78716c;--band-text:#d6d3d1;
+  --call:#c2410c;--call-bg:#fff1e8;--email:#1d4ed8;--email-bg:#eaf0fe;--text:#6d4fd1;--text-bg:#f1edfc;
+  --good:#1e7a46;--good-bg:#e8f6ec;--warn:#8a6a12;--warn-bg:#fdf8e6;--bad:#c22a1e;--bad-bg:#fdeae7;
+  --display:"Archivo","Inter","Segoe UI",system-ui,sans-serif;
+  --body:"Inter",ui-sans-serif,"Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);color:var(--ink);text-wrap:balance;margin:0}
+p{margin:0;color:var(--ink-2)}
+strong{color:var(--ink);font-weight:600}
+a{color:var(--amber-deep)}
+.k{font-weight:600;color:var(--ink);white-space:nowrap}
+:focus-visible{outline:3px solid var(--amber-deep);outline-offset:2px}
+
+/* Title band */
+.band{background:var(--band)}
+.band .wrap{padding-block:26px 34px}
+.logo{display:block;width:150px;height:auto}
+.band h1{color:#fff;font-weight:800;font-size:clamp(30px,5.4vw,46px);line-height:1.06;letter-spacing:-.015em;margin-top:30px}
+.band .lede{color:var(--band-text);font-size:18px;margin-top:12px;max-width:62ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:22px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#a8a29e}
+.meta span:first-child{color:var(--amber)}
+.subbar{background:var(--band-2)}
+.subbar .wrap{display:flex;flex-wrap:wrap;gap:8px;padding-block:12px}
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--paper);background:#3a3532;border-radius:999px;padding:6px 13px}
+.chip b{font-family:var(--display);color:var(--amber);font-weight:800;letter-spacing:.04em}
+
+/* Page: contents on the left, cards on the right */
+.page{display:grid;grid-template-columns:220px minmax(0,1fr);gap:32px;align-items:start;padding-block:30px 48px}
+.toc{position:sticky;top:20px;display:flex;flex-direction:column;gap:2px;font-size:14px}
+.toc .lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);padding:0 10px 8px}
+.toc a{display:flex;gap:10px;align-items:baseline;color:var(--ink-2);text-decoration:none;padding:6px 10px;border-radius:8px}
+.toc a:hover{background:var(--surface);color:var(--ink)}
+.toc a.on{background:var(--surface);color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+.toc a span{font-family:var(--display);font-weight:800;color:var(--amber-deep);font-size:12px;min-width:14px}
+main{display:flex;flex-direction:column;gap:22px;min-width:0}
+section.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:26px 28px;display:flex;flex-direction:column;gap:16px;min-width:0;scroll-margin-top:16px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-deep)}
+section.card h2{font-size:clamp(22px,3vw,28px);font-weight:800;letter-spacing:-.01em;line-height:1.15}
+section.card h3{font-size:17px;font-weight:700}
+.intro{font-size:17px;max-width:66ch}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+.list{display:grid;gap:14px}
+.item{display:grid;gap:3px}
+
+/* Numbered steps (a real sequence) */
+.steps{display:grid;gap:14px;counter-reset:s}
+.step{display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;align-items:start;counter-increment:s}
+.step::before{content:counter(s);width:34px;height:34px;border-radius:50%;background:var(--amber);color:var(--band);font:800 15px var(--display);display:grid;place-items:center}
+
+/* Drawn screens */
+.screen{background:var(--ground);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:10px;min-width:0}
+.screen .bar{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--soft)}
+.screen .bar i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.switch{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px;width:max-content;max-width:100%;font-size:13px}
+.switch span{padding:5px 11px;border-radius:7px;color:var(--soft)}
+.switch .on{background:var(--amber-soft);color:var(--amber-deep);font-weight:600;box-shadow:0 0 0 1px #fcd9a0}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:4px}
+.tile .code{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:#fff;font:800 12px var(--display);background:var(--c)}
+.tile b{font-size:13.5px}
+.tile small{font-size:11.5px;color:var(--soft)}
+.tile.hl{box-shadow:0 0 0 2px var(--amber)}
+.num b{display:block;font:800 22px var(--display);color:var(--tc,var(--ink));font-variant-numeric:tabular-nums}
+.num small{font-size:11.5px;color:var(--soft)}
+.row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;min-width:0}
+.row .av{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font:700 11px var(--body);background:var(--amber-soft);color:var(--amber-deep);flex:none}
+.row .nm{font-weight:600;font-size:13.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .amt{font-variant-numeric:tabular-nums;font-weight:600;font-size:13px}
+.dots{display:flex;gap:4px}.dots i{width:9px;height:9px;border-radius:50%;background:var(--d)}
+.next{border-radius:10px;padding:12px;background:var(--call-bg);display:grid;gap:8px}
+.next .t{font:700 14px var(--display);color:var(--call)}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+.b{font:600 12.5px var(--body);border-radius:8px;padding:6px 10px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.b.solid{background:var(--call);border-color:var(--call);color:#fff}
+.caption{font-size:12px;color:var(--soft)}
+
+/* Pills, notes, tables */
+.pill{display:inline-flex;align-items:center;font:600 12px var(--body);border-radius:999px;padding:2px 9px;background:var(--pb);color:var(--pc);white-space:nowrap}
+.note{display:block;background:var(--amber-soft);border:1px solid #fde4b0;border-radius:10px;padding:12px 14px;font-size:15px}
+.note b{color:var(--ink)}
+.note.plain{background:var(--ground);border-color:var(--line)}
+.legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.legend div{display:flex;align-items:center;gap:10px;background:var(--lb);color:var(--lc);border-radius:10px;padding:9px 12px;font-weight:500;font-size:14px}
+.legend i{width:10px;height:10px;border-radius:50%;background:var(--lc);flex:none}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:560px}
+th,td{text-align:left;padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+thead th{border-top:0;background:var(--ground);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}
+td.c,th.c{text-align:center;width:88px}
+td small{display:block;color:var(--soft);font-size:12.5px}
+tr.grp td{background:var(--ground);font-weight:700;font-family:var(--display);font-size:13px;color:var(--ink-2)}
+.yes{color:var(--good);font-weight:700}.no{color:#a8a29e}
+.roles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.role{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:4px;align-content:start}
+.role b{font-family:var(--display);font-size:16px}
+.role span{font-size:14px;color:var(--ink-2)}
+details{border:1px solid var(--line);border-radius:10px;background:var(--ground)}
+details+details{margin-top:8px}
+summary{cursor:pointer;list-style:none;padding:12px 16px;font-weight:600;display:flex;justify-content:space-between;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font:500 20px/1 var(--display);color:var(--soft)}
+details[open] summary::after{content:"−"}
+details p{padding:0 16px 14px}
+footer{color:var(--soft);font-size:13px;text-align:center;padding-bottom:40px}
+
+@media (max-width:900px){
+  .page{grid-template-columns:minmax(0,1fr)}
+  .toc{position:static;flex-direction:row;flex-wrap:wrap}
+  .toc .lbl{width:100%}
+  .two,.roles{grid-template-columns:1fr 1fr}
+}
+@media (max-width:560px){
+  .two,.roles,.legend{grid-template-columns:1fr}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  section.card{padding:20px 18px}
+}
+@media print{
+  body{background:#fff;font-size:12.5px}
+  .toc{display:none}
+  .page{display:block;padding-block:16px}
+  main{gap:12px}
+  section.card{break-inside:avoid-page;border-color:#ddd;padding:18px 20px;margin-bottom:12px}
+  section.card.long{break-inside:auto}
+  .tablewrap{overflow:visible}
+  table{min-width:0}
+  details{break-inside:avoid}
+  details>p{display:block}
+  details summary::after{content:""}
+  section.card.printtoc{display:block!important}
+}
+section.card.printtoc{display:none}
+.printtoc ol{margin:8px 0 0;padding-left:20px;columns:2;column-gap:28px}
+.printtoc a{color:var(--ink);text-decoration:none}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header class="band"><div class="wrap">
+  <img class="logo" src="data:image/png;base64,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" alt="DBM Supplies">
+  <h1>Chasing what customers owe</h1>
+  <p class="lede">How DBM Supplies' Collections works in the Accounts Portal: getting in, who can do what, your list for the day, each customer's file, credit limits and reports.</p>
+  <div class="meta"><span>Collections user guide</span><span>DBM Supplies</span><span>Updated 17 Nov 2026</span></div>
+</div></header>
+<div class="subbar"><div class="wrap">
+  <span class="chip"><b>1</b> Nothing goes by itself</span>
+  <span class="chip"><b>7:35</b> A fresh list every morning</span>
+  <span class="chip"><b>15 min</b> Xero read every 15 minutes</span>
+</div></div>
+
+<div class="wrap page">
+  <nav class="toc" aria-label="Contents" id="toc">
+    <span class="lbl">On this page</span>
+    <a href="#picture"><span>·</span>The big picture</a>
+    <a href="#in"><span>1</span>Getting in</a>
+    <a href="#roles"><span>2</span>Who can do what</a>
+    <a href="#today"><span>3</span>Today: your list</a>
+    <a href="#call"><span>4</span>After a call</a>
+    <a href="#customers"><span>5</span>Customers and files</a>
+    <a href="#limits"><span>6</span>Credit limits</a>
+    <a href="#more"><span>7</span>The other pages</a>
+    <a href="#faq"><span>?</span>Quick answers</a>
+  </nav>
+
+  <main>
+    <section class="card printtoc" aria-label="Contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#picture">The big picture</a></li><li><a href="#in">Getting in</a></li><li><a href="#roles">Who can do what</a></li>
+        <li><a href="#today">Today: your list</a></li><li><a href="#call">After a call</a></li><li><a href="#customers">Customers and files</a></li>
+        <li><a href="#limits">Credit limits</a></li><li><a href="#more">The other pages</a></li><li><a href="#faq">Quick answers</a></li>
+      </ol>
+    </section>
+
+    <section class="card" id="picture">
+      <div class="eyebrow">The big picture</div>
+      <h2>Your calls, texts and emails for the day, ready each morning</h2>
+      <p class="intro">Collections reads DBM Supplies' Xero and works out who to chase today: who to call, who only needs a reminder, and whose promise to pay falls due. You make the calls and press send. Every step is written down, so anyone can pick up where you left off.</p>
+      <div class="two">
+        <div class="list">
+          <div class="item"><h3>Nothing goes by itself</h3><p>Every call, text and email goes only when you press it and say yes. Automatic sending is switched off.</p></div>
+          <div class="item"><h3>A fresh list every morning</h3><p>Today fills itself at 7:35 each morning, the most pressing customers first. A step closes by itself once the customer pays.</p></div>
+        </div>
+        <div class="list">
+          <div class="item"><h3>From DBM Supplies' Xero</h3><p>Invoices, payments and contact details are read from DBM Supplies' Xero every 15 minutes. Nothing is changed in Xero.</p></div>
+          <div class="item"><h3>The colours mean the same everywhere</h3><p>Once you know them, every page reads at a glance:</p></div>
+        </div>
+      </div>
+      <div class="legend" role="list" aria-label="What the colours mean">
+        <div role="listitem" style="--lb:var(--call-bg);--lc:var(--call)"><i></i>A call, or the next thing to do</div>
+        <div role="listitem" style="--lb:var(--email-bg);--lc:var(--email)"><i></i>An email</div>
+        <div role="listitem" style="--lb:var(--text-bg);--lc:var(--text)"><i></i>A text</div>
+        <div role="listitem" style="--lb:var(--good-bg);--lc:var(--good)"><i></i>Paid, kept or done</div>
+        <div role="listitem" style="--lb:var(--warn-bg);--lc:var(--warn)"><i></i>Have a look: missing or waiting</div>
+        <div role="listitem" style="--lb:var(--bad-bg);--lc:var(--bad)"><i></i>Very late, on hold or over limit</div>
+      </div>
+    </section>
+
+    <section class="card" id="in">
+      <div class="eyebrow">Step 1</div>
+      <h2>Getting in</h2>
+      <div class="two">
+        <div class="steps">
+          <div class="step"><div><h3>Sign in</h3><p>Open <strong>accounts.discountbuildingmaterial.com.au</strong> and sign in with your work Microsoft account, as you do for email.</p></div></div>
+          <div class="step"><div><h3>Pick DBM Supplies</h3><p>At the top of the home page, click <span class="k">DBM Supplies</span>. If you only have DBM Supplies, it opens there by itself.</p></div></div>
+          <div class="step"><div><h3>Click Collections</h3><p>Click the <span class="k">CL</span> tile. Your pages are in the bar on the left: hover over an icon to see its name.</p></div></div>
+        </div>
+        <div class="screen" aria-label="Drawing of the DBM Supplies home">
+          <div class="bar"><i></i><i></i><i></i><span>Accounts Portal · Home</span></div>
+          <div class="switch"><span>DBM</span><span class="on">DBM Supplies</span></div>
+          <p style="font:700 16px var(--display);color:var(--ink)">Good morning. Pick where to work.</p>
+          <div class="tiles">
+            <div class="tile" style="--c:#d97706"><span class="code">AP</span><b>Accounts payable</b><small>Supplier bills</small></div>
+            <div class="tile" style="--c:#b45309"><span class="code">AR</span><b>Accounts receivable</b><small>Customer invoices</small></div>
+            <div class="tile hl" style="--c:#1d4ed8"><span class="code">CL</span><b>Collections</b><small>Who owes DBM Supplies</small></div>
+          </div>
+          <span class="caption">A drawing of the portal. You only see the tiles you've been given.</span>
+        </div>
+      </div>
+      <div class="note"><b>Only DBM Supplies.</b> If you collect for DBM Supplies only, Collections shows DBM Supplies' customers and nothing else: there's no company switch to pick from. People who collect for several companies pick one at the top of each page, or All companies.</div>
+      <div class="note plain"><b>Switching portals.</b> Click <span class="k">Collections</span> next to the logo at the top of the left bar: every portal you can open appears on a circle. Click one to go there.</div>
+    </section>
+
+    <section class="card long" id="roles">
+      <div class="eyebrow">Step 2</div>
+      <h2>Who can do what</h2>
+      <p class="intro">Every person has a level in Collections, and a set of companies they collect for. Someone can be Admin in DBM Supplies' Collections and have no access to DBM's at all.</p>
+      <div class="roles">
+        <div class="role"><b>Off</b><span>Collections doesn't show for them.</span></div>
+        <div class="role"><b>Staff</b><span>Works the list: calls, texts, emails, promises and notes.</span></div>
+        <div class="role"><b>Admin</b><span>Everything Staff does, plus raising limits, legal holds, Settings and everyone's activity.</span></div>
+        <div class="role"><b>Super admin</b><span>Admin in every company, and the only one who gives people access.</span></div>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>What you can do</th><th class="c">Staff</th><th class="c">Admin</th><th class="c">Super admin</th></tr></thead>
+          <tbody>
+            <tr class="grp"><td colspan="4">Looking</td></tr>
+            <tr><td>Open Collections and its pages: Today, Customers, Payments, Scoreboard, Reminders, Credit limits, Reports</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+            <tr><td>Activity: calls, texts and emails made<small>Staff see their own; admins see everyone's.</small></td><td class="c">Own</td><td class="c yes">All</td><td class="c yes">All</td></tr>
+            <tr><td>Look at Settings</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+            <tr class="grp"><td colspan="4">Day-to-day work</td></tr>
+            <tr><td>Call and text from DBM Call, send reminder emails, Send all</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+            <tr><td>Say how a call went, add a promise or a follow-up date, Mark sent, Skip, Reopen</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+            <tr><td>Statements, Email statement, Export file, download reports</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+            <tr><td>Lower a customer's credit limit</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+            <tr class="grp"><td colspan="4">Bigger decisions</td></tr>
+            <tr><td>Set a first limit, or raise a limit</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+            <tr><td>Place or lift a legal hold</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+            <tr><td>Change Settings: who reminders can reach, the reminder ladder and its wording</td><td class="c no">—</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+            <tr class="grp"><td colspan="4">Managing people</td></tr>
+            <tr><td>Give someone Collections, as Staff or Admin; choose their companies and pages<small>On the home page's Users, or Collections › People.</small></td><td class="c no">—</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+            <tr><td>The weekly report email: who gets it and when</td><td class="c no">—</td><td class="c no">—</td><td class="c yes">✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note"><b>To get access</b>, ask a super admin. They open Users on the DBM Supplies home, find you, and set Collections to Staff or Admin. Given there, it's for DBM Supplies only. They can also narrow which pages you see.</div>
+    </section>
+
+    <section class="card" id="today">
+      <div class="eyebrow">Step 3 · every day</div>
+      <h2>Today: your list for the day</h2>
+      <div class="two">
+        <div class="screen" aria-label="Drawing of the Today page">
+          <div class="bar"><i></i><i></i><i></i><span>Collections · Today</span></div>
+          <div class="tiles">
+            <div class="tile num" style="--tc:var(--call)"><b>6</b><small>To call</small></div>
+            <div class="tile num" style="--tc:var(--email)"><b>9</b><small>Reminders only</small></div>
+            <div class="tile num" style="--tc:var(--good)"><b>2</b><small>Promises due</small></div>
+          </div>
+          <div class="row"><span class="av">HB</span><span class="nm">Harbourside Builders</span><span class="dots"><i style="--d:var(--call)"></i><i style="--d:var(--email)"></i><i style="--d:var(--text)"></i></span><span class="amt">$8,240</span></div>
+          <div class="row"><span class="av">RF</span><span class="nm">Ridgeway Formwork</span><span class="dots"><i style="--d:var(--call)"></i></span><span class="amt">$3,615</span></div>
+          <div class="next">
+            <span class="t">Do this next · Call</span>
+            <span style="font-size:13px;color:var(--ink-2)">Promised to pay by 14 Nov, still overdue</span>
+            <div class="btns"><span class="b solid">Call</span><span class="b">Say how the call went</span><span class="b">Skip</span></div>
+          </div>
+          <span class="caption">A drawing with sample customers, not real ones.</span>
+        </div>
+        <div class="list">
+          <div class="item"><h3>Who's next</h3><p>One row per customer, most pressing first: calls left from an earlier day, then broken promises, then customers over their limit, then the biggest amounts. The small dots show what's left for them; a tick means done.</p></div>
+          <div class="item"><h3>Do this next</h3><p><span class="k">Call</span> and <span class="k">Text</span> open DBM Call with their number ready, from your own Dialpad line. <span class="k">Send email</span> sends from DBM Supplies' mailbox with their pay link. Each one asks you first.</p></div>
+          <div class="item"><h3>Mark sent and Skip</h3><p><span class="k">Mark sent</span> is for a message you sent another way. <span class="k">Skip</span> is for one that isn't needed. Both ask first.</p></div>
+        </div>
+      </div>
+      <div class="two">
+        <div class="list">
+          <div class="item"><h3><span class="pill" style="--pb:var(--email-bg);--pc:var(--email)">Reminders only</span></h3><p>Customers who only need an email or a text today. <span class="k">Send all</span> sends the reminder emails one after another: it asks first, and <span class="k">Stop</span> halts it. Texts go one at a time from DBM Call.</p></div>
+          <div class="item"><h3><span class="pill" style="--pb:var(--good-bg);--pc:var(--good)">Promises due</span></h3><p>Promises falling due today, or missed yesterday. A missed promise comes back as a call.</p></div>
+        </div>
+        <div class="list">
+          <div class="item"><h3><span class="pill" style="--pb:var(--good-bg);--pc:var(--good)">Done</span></h3><p>What's been done in the last two weeks, and who did it. Made a mistake? Open it and press <span class="k">Reopen</span>.</p></div>
+          <div class="item"><h3><span class="pill" style="--pb:var(--warn-bg);--pc:var(--warn)">Missing details</span></h3><p>Customers who owe money but have no phone or email in Xero. Add them in DBM Supplies' Xero and they drop off within 15 minutes.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="call">
+      <div class="eyebrow">Step 4</div>
+      <h2>After a call: say how it went</h2>
+      <p class="intro">Press <span class="k">Say how the call went</span> and pick one. What you pick decides when the customer comes back on the list.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>How it went</th><th>What happens next</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill" style="--pb:var(--good-bg);--pc:var(--good)">Promised to pay</span></td><td>Give the date they'll pay by, and the amount if they said one. They're not called before then. Still overdue the day after, and they're back near the top as a broken promise.</td></tr>
+            <tr><td><span class="pill" style="--pb:var(--good-bg);--pc:var(--good)">Says it's paid</span></td><td>Today's step is done. Once the payment reaches Xero, their steps close by themselves.</td></tr>
+            <tr><td><span class="pill" style="--pb:var(--bad-bg);--pc:var(--bad)">Disputed</span></td><td>Add a note saying what's in dispute, so the next person knows. It shows on their file.</td></tr>
+            <tr><td><span class="pill" style="--pb:var(--warn-bg);--pc:var(--warn)">No answer</span> <span class="pill" style="--pb:var(--warn-bg);--pc:var(--warn)">Left a message</span></td><td>They're called again a week on, while they're still overdue.</td></tr>
+            <tr><td><span class="pill" style="--pb:var(--ground);--pc:var(--ink-2)">Other</span></td><td>Add a note to say how the call went.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note"><b>Follow up on (optional).</b> With any outcome, pick a date to come back to them. They won't be called before it, and they're back on Today that morning while they still owe anything. With a promise too, whichever date comes first.</div>
+      <div class="note plain"><b>Spoke to them?</b> Today's email and text to that customer can be skipped, so they don't get a reminder straight after your call.</div>
+    </section>
+
+    <section class="card" id="customers">
+      <div class="eyebrow">Step 5</div>
+      <h2>Customers and their files</h2>
+      <div class="two">
+        <div class="list">
+          <div class="item"><h3>Who needs attention</h3><p>The tiles at the top: overdue, on hold, over their limit, unapplied credit, and accounts that might be the same business. Press one to list them.</p></div>
+          <div class="item"><h3>Find anyone</h3><p>Search by name, ABN or account number, or narrow the list with the filters. Each row shows what's overdue and how old, the limit, their standing, when they last paid and when we last spoke.</p></div>
+          <div class="item"><h3>Same business?</h3><p>Accounts with no ABN in Xero whose name reads like another customer's. Say whether they're the same business; it's only asked once.</p></div>
+        </div>
+        <div class="list">
+          <div class="item"><h3>A customer's file</h3><p>Press a name to open it: their unpaid invoices, <span class="k">Statement</span> and <span class="k">Email statement</span>, and everything that's happened with them.</p></div>
+          <div class="item"><h3>Export file</h3><p>The whole file as one zip: the timeline as a PDF, each call's transcript and recording link, each text conversation, each email and the letters. It asks first.</p></div>
+          <div class="item"><h3><span class="pill" style="--pb:var(--bad-bg);--pc:var(--bad)">Legal hold</span> · Admin</h3><p>Only for a customer whose debt is going legal. Collections stops chasing them, and their DBM Supplies limit goes to $0 so they can't order. It shows in red with who placed it, when and why. Lifting it puts their limit back exactly as it was.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="limits">
+      <div class="eyebrow">Step 6</div>
+      <h2>Credit limits</h2>
+      <p class="intro">Pick <span class="k">Credit limits</span> in the left bar. For DBM Supplies it shows each customer's Approved Limit from the DBM Supplies portal's Customer credit, and what they owe from Xero.</p>
+      <div class="two">
+        <div class="list">
+          <div class="item"><h3>Change a limit</h3><p>Anyone can lower a limit. Setting a first limit or raising one needs an Admin. Both ask first, and the change is saved straight to the DBM Supplies portal.</p></div>
+          <div class="item"><h3>What stops ordering</h3><p>An account customer with no credit left can't order in the DBM Supplies portal. A cash (COD) customer is only stopped once they owe $25,000.</p></div>
+        </div>
+        <div class="list">
+          <div class="item"><h3>No separate hold button</h3><p>DBM Supplies has no on/off hold. To stop a customer ordering while their debt goes legal, an Admin uses <strong>Legal hold</strong> on their file.</p></div>
+          <div class="item"><h3>Insurance</h3><p>Record a customer's credit insurance on their row, so everyone can see what's covered.</p></div>
+        </div>
+      </div>
+      <div class="note"><b>NIL isn't a hold.</b> A limit of NIL in the DBM Supplies portal turns the credit check off, so the customer can order without limit. Use Legal hold, not NIL, to stop someone.</div>
+    </section>
+
+    <section class="card" id="more">
+      <div class="eyebrow">Step 7</div>
+      <h2>The other pages</h2>
+      <div class="two">
+        <div class="list">
+          <div class="item"><h3>Payments</h3><p>What customers paid by card on their pay links, and whether it's in Xero yet. Accounts records each one in Xero by hand; it shows as In Xero within 15 minutes. Waiting three days or more turns red.</p></div>
+          <div class="item"><h3>Activity</h3><p>Calls, texts, emails and promises over a period you pick. Press <span class="k">Details</span> on a call for DBM Call's summary and transcript once they're ready.</p></div>
+          <div class="item"><h3>Scoreboard</h3><p>The numbers: what's overdue, what's been collected this month, how long customers take to pay, and what's owed by age.</p></div>
+        </div>
+        <div class="list">
+          <div class="item"><h3>Reminders</h3><p>A preview of what the reminder ladder would send, day by day, to whom and in what words. Nothing is sent from here; the ones to send are on Today.</p></div>
+          <div class="item"><h3>Reports</h3><p>Download <strong>Excel</strong> (every customer and unpaid invoice) or <strong>Word</strong> (a written report of two or three pages). It asks first.</p></div>
+          <div class="item"><h3>Settings · Admin</h3><p>Who reminders can reach (nobody, the test list or customers), when each reminder goes as an invoice ages, and its wording, with a preview using a customer's own figures.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="faq">
+      <div class="eyebrow">Quick answers</div>
+      <h2>Questions people ask</h2>
+      <div>
+        <details open><summary>Will it ever text or email a customer by itself?</summary><p>No. Automatic sending is off. Every call, text and email goes only when you press it and say yes.</p></details>
+        <details open><summary>I saved the wrong outcome for a call.</summary><p>Open the Done tile on Today, find it, and press Reopen. Then say how it really went.</p></details>
+        <details open><summary>How do I get a customer back on my list on a certain day?</summary><p>When you say how the call went, pick a date in Follow up on. They're back on Today that morning.</p></details>
+        <details open><summary>A customer paid by card but still shows as owing.</summary><p>Look in Payments. Once Accounts records it in Xero, it updates within 15 minutes.</p></details>
+        <details open><summary>A customer has no phone or email.</summary><p>They're under Missing details on Today. Add them in DBM Supplies' Xero and they come through within 15 minutes.</p></details>
+        <details open><summary>I can't see Collections, a page, or DBM Supplies.</summary><p>You only see what you've been given. Ask a super admin to change it under Users on the DBM Supplies home.</p></details>
+        <details open><summary>Where's the guide inside the portal?</summary><p>Press Guide at the top of any Collections page for a tour on the real screen, or just the part you need.</p></details>
+      </div>
+    </section>
+
+    <footer>DBM Supplies · Collections user guide · Updated 17 Nov 2026. The screens are drawings with sample customers, not real ones. Questions? Ask the portal team, with a screenshot.</footer>
+  </main>
+</div>
+
+<script>
+// The section you're reading, lit in the contents.
+(function () {
+  if (!("IntersectionObserver" in window)) return;
+  var links = {};
+  document.querySelectorAll("#toc a").forEach(function (a) { links[a.getAttribute("href").slice(1)] = a; });
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting || !links[e.target.id]) return;
+      Object.keys(links).forEach(function (k) { links[k].classList.remove("on"); });
+      links[e.target.id].classList.add("on");
+    });
+  }, { rootMargin: "-30% 0px -60% 0px" });
+  document.querySelectorAll("section.card[id]").forEach(function (s) { io.observe(s); });
+})();
+</script>
+</body>
+</html>
